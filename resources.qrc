@@ -1,0 +1,26 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>imgs/aircraft01.png</file>
+    <file>imgs/aircraft02.png</file>
+    <file>imgs/aircraft03.png</file>
+    <file>imgs/aircraft04.png</file>
+    <file>imgs/app-exit.png</file>
+    <file>imgs/calculator00.png</file>
+    <file>imgs/calculator01.png</file>
+    <file>imgs/calculator02.png</file>
+    <file>imgs/calculator03.png</file>
+    <file>imgs/document-new.png</file>
+    <file>imgs/document-open.png</file>
+    <file>imgs/document-print.png</file>
+    <file>imgs/document-save.png</file>
+    <file>imgs/document-save-as.png</file>
+    <file>imgs/edit-copy.png</file>
+    <file>imgs/edit-cut.png</file>
+    <file>imgs/edit-paste.png</file>
+    <file>imgs/edit-redo.png</file>
+    <file>imgs/edit-undo.png</file>
+    <file>imgs/qdata.png</file>
+    <file>imgs/unit-translation.png</file>
+    <file>imgs/WingManager.png</file>
+  </qresource>
+</RCC>
