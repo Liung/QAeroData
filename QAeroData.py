@@ -13,6 +13,7 @@ from tools.wingView import WingViewWin
 from tools import miniCalculation, QPicConvertor, img2gifWidget, Tetris
 from dataFilter import dataFilterMain, dataFilterBatchMain
 from widget import matplotlibWidget
+
 import qrc_resources
 
 __version__ = '1.0.0'
