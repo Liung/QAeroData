@@ -1,229 +1,522 @@
 #coding: UTF-8
+"""
+本文件为天平数据处理程序,包含：
+BalanceG18——》18杆天平
+BalanceG16——》16杆天平
+BalanceG14——》14杆天平
+BalanceBox——》盒式天平
+"""
+
 from __future__ import division
 import math
 import os
 import re
 import shutil
 import string
-
 import numpy as np
+from numpy import (genfromtxt, zeros, deg2rad, sin, cos, savetxt, hstack)
 
-
-__author__ = 'Vincent'
-
-'''
-本文件为天平数据处理程序,包含：
-BalanceG18——》18杆天平
-BalanceG16——》16杆天平
-BalanceG14——》14杆天平
-BalanceBox——》盒式天平
-'''
-
-AIR_DENSITY = 1.2250  # 空气密度
+AIR_DENSITY = 1.2250    # 空气密度
 ABSOLUTE_ZERO = 273.15  # 绝对零度
 DYN_PITCH, DYN_YAW, DYN_ROLL, STA_PITCH, STA_YAW, STA_ROLL = range(6)
 
-def sind(deg):
-    return np.sin(np.deg2rad(deg))
 
-def asind(num):
-    return np.rad2deg(np.arcsin(num))
-
-def atand(num):
-    return np.rad2deg(np.arctan(num))
-
-def cosd(deg):
-    return np.cos(np.deg2rad(deg))
-
-class Model(object):
-    pass
-
-class AircraftModel(Model):
-    def __init__(self,area=0.,span=0.,rootChord=0.,refChord=0.):
+class AircraftModel(object):
+    def __init__(self, area=0., span=0., rootChord=0., refChord=0., V=25, dx=0., dy=0., dz=0.):
         self.Area = area
         self.Span = span
         self.RootChord = rootChord
         self.RefChord = refChord
+        self.V = V
+        self.FlowPressure = 0.5*AIR_DENSITY*self.V**2
+        self.dx = dx
+        self.dy = dy
+        self.dz = dz
 
-        #初始化数据：
-        self.WindSpeed = 25
-        self.FlowPressure = 0.5*AIR_DENSITY*self.WindSpeed**2
-        self.CelsiusTemperature = 25
-        self.KelvinTemperature = self.CelsiusTemperature + ABSOLUTE_ZERO
-
-        self.BalanceDeltaX = 0.
-        self.BalanceDeltaY = 0.
-        self.BalanceDeltaZ = 0.
-
-    def setWindSpeed(self,windSpeed=0.):
-        self.WindSpeed = windSpeed
-        self.FlowPressure = 0.5*AIR_DENSITY*self.WindSpeed**2
+    def setV(self, V=0.):
+        self.V = V
+        self.FlowPressure = 0.5*AIR_DENSITY*self.V**2
 
     def setFlowPressure(self,flowPressure=0.):
         self.FlowPressure = flowPressure
-        self.WindSpeed = math.sqrt(2.*flowPressure/AIR_DENSITY)
+        self.V = math.sqrt(2.*flowPressure/AIR_DENSITY)
 
-    def setCelsiusTemperature(self,celsiusTemperature=0.):
-        self.CelsiusTemperature = celsiusTemperature
-        self.KelvinTemperature = celsiusTemperature + ABSOLUTE_ZERO
-
-    def setKelvinTemperature(self,kelvinTemperature=273.15):
-        self.KelvinTemperature = kelvinTemperature
-        self.CelsiusTemperature = kelvinTemperature - ABSOLUTE_ZERO
-
-    def setBalanceDistance(self, deltaX=0., deltaY=0, deltaZ=0.):
-        self.BalanceDeltaX = deltaX
-        self.BalanceDeltaY = deltaY
-        self.BalanceDeltaZ = deltaZ
+    def setDelta(self, dx=0., dy=0, dz=0.):
+        self.dx = dx
+        self.dy = dy
+        self.dz = dz
 
 
-def BalanceG18(staFile='', dynFile='', aeroFile='', bodyFile='',
-               headerRows=1, phi0=0, aircraftModel=None):
+class Balance(object):
+    def __init__(self, staFile=None, dynFile=None, bodyFile=None, aeroFile=None,
+                 headerRows=1, footerRows=0, angleStartCol=0, angleEndCol=3,
+                 forceStartCol=4, forceEndCol=9, aircraftModel=None):
+        self._staFile = staFile
+        self._dynFile = dynFile
+        self._bodyFile = bodyFile
+        self._aeroFile = aeroFile
+        self._headerRows = headerRows
+        self._footerRows = footerRows
+        self._angleStartCol = angleStartCol
+        self._angleEndCol = angleEndCol
+        self._angleCols = angleEndCol + 1 - angleStartCol
+        self._forceStartCol = forceStartCol
+        self._forceEndCol = forceEndCol
 
-    dx = aircraftModel.BalanceDeltaX
-    dy = aircraftModel.BalanceDeltaY
-    dz = aircraftModel.BalanceDeltaZ
-    q = aircraftModel.FlowPressure
-    s = aircraftModel.Area
-    l = aircraftModel.Span
-    ba = aircraftModel.RefChord
+        self._V = 0.
+        self._S = 0.
+        self._L = 0.
+        self._rootChord = 0.
+        self._refChord = 0.
+        self._FlowPressure = 0.
+        self._dx = 0.
+        self._dy = 0.
+        self._dz = 0.
+        if aircraftModel is not None:
+            self.setAircraftModel(aircraftModel)
 
-    jf = open(staFile,'r')
-    df = open(dynFile,'r')
-    jdata = np.loadtxt(jf.readlines()[headerRows:], dtype=np.float)
-    ddata = np.loadtxt(df.readlines()[headerRows:], dtype=np.float)
-    jf.close()
-    df.close()
+    def setStaFile(self, staFile):
+        self._staFile = staFile
 
-    angle = jdata[:,1:5]
-    Cy = jdata[:,5:11]
-    Cn = ddata[:,5:11]
-    Cy=Cy-Cn
-    aeroAngle = np.zeros_like(angle)
-    Ct=np.zeros_like(Cy)
-    Ctw=np.zeros_like(Cy)
-    Cq=np.zeros_like(Cy)
-    aeroCoe = np.zeros_like(Cy)
-    bodyCoe = np.zeros_like(Cy)
-    m, = angle.shape
-    t = np.linspace(0.001,m/1000,m)
+    def setDynFile(self, dynFile):
+        self._dynFile = dynFile
 
-    for i in xrange(m): 
-        aeroAngle[i,0] = atand((sind(angle[i,0])*cosd(angle[i,2])-cosd(angle[i,0])*sind(angle[i,1])*sind(angle[i,2]))/(cosd(angle[i,0])*cosd(angle[i,1])))
-        aeroAngle[i,1]=asind(sind(angle[i,0])*sind(angle[i,2])+cosd(angle[i,0])*sind(angle[i,1])*cosd(angle[i,2]))
-        aeroAngle[i,2]=angle[i,2]+phi0
-        aeroAngle[i,3]=angle[i,3]
-        
-        cxw0=6.11960*Cy[i,0]
-        cyw0=12.33276*Cy[i,1]
-        czw0=4.76279*Cy[i,2]
-        cmxw0=0.38218*Cy[i,3]
-        cmyw0=0.19456*Cy[i,4]
-        cmzw0=0.69732*Cy[i,5]
-        Ct[i,0]=cxw0
-        Ct[i,1]=cyw0
-        Ct[i,2]=czw0
-        Ct[i,3]=cmxw0
-        Ct[i,4]=cmyw0
-        Ct[i,5]=cmzw0
-        for k in xrange(100):
-            Ct[i,0]=cxw0+0.00548*Ct[i,1]+0.10290*Ct[i,2]+0.12796*Ct[i,3]+1.03638*Ct[i,4]-0.21182*Ct[i,5] \
-                    +0.00090*Ct[i,0]*Ct[i,0]-0.00023*Ct[i,0]*Ct[i,1]+0.00034*Ct[i,0]*Ct[i,2]+0.00198*Ct[i,0]*Ct[i,3] \
-                    +0.00447*Ct[i,0]*Ct[i,4]-0.00065*Ct[i,0]*Ct[i,5]-0.00001*Ct[i,1]*Ct[i,2]-0.00444*Ct[i,1]*Ct[i,3] \
-                    -0.00041*Ct[i,1]*Ct[i,4]+0.00512*Ct[i,1]*Ct[i,5]+0.00014*Ct[i,2]*Ct[i,2]-0.00243*Ct[i,2]*Ct[i,3] \
-                    -0.00292*Ct[i,2]*Ct[i,4]+0.00033*Ct[i,2]*Ct[i,5]-0.31818*Ct[i,3]*Ct[i,3]+0.04225*Ct[i,3]*Ct[i,4] \
-                    +0.27065*Ct[i,3]*Ct[i,5]-0.02223*Ct[i,4]*Ct[i,4]-0.01045*Ct[i,4]*Ct[i,5]-0.02171*Ct[i,5]*Ct[i,5]
-            Ct[i,1]=cyw0-0.01686*Ct[i,0]+0.01297*Ct[i,2]-0.23388*Ct[i,3]-0.19139*Ct[i,4]+0.18227*Ct[i,5] \
-                    -0.00010*Ct[i,1]*Ct[i,1]-0.00010*Ct[i,1]*Ct[i,0]+0.00004*Ct[i,1]*Ct[i,2]-0.00274*Ct[i,1]*Ct[i,3] \
-                    +0.00056*Ct[i,1]*Ct[i,4]+0.00107*Ct[i,1]*Ct[i,5]+0.00045*Ct[i,0]*Ct[i,0]+0.00030*Ct[i,0]*Ct[i,2] \
-                    +0.00077*Ct[i,0]*Ct[i,3]+0.00181*Ct[i,0]*Ct[i,4]-0.00549*Ct[i,0]*Ct[i,5]-0.00006*Ct[i,2]*Ct[i,2] \
-                    -0.01497*Ct[i,2]*Ct[i,3]+0.00340*Ct[i,2]*Ct[i,4]+0.00213*Ct[i,2]*Ct[i,5]-0.03901*Ct[i,3]*Ct[i,3] \
-                    -0.15065*Ct[i,3]*Ct[i,4]+0.02407*Ct[i,3]*Ct[i,5]+0.00754*Ct[i,4]*Ct[i,4]+0.02244*Ct[i,4]*Ct[i,5] \
-                    -0.01096*Ct[i,5]*Ct[i,5]
-            Ct[i,2]=czw0-0.02295*Ct[i,1]+0.00338*Ct[i,0]-0.17365*Ct[i,3]-0.36139*Ct[i,4]+0.00857*Ct[i,5] \
-                    +0.00032*Ct[i,2]*Ct[i,2]-0.00009*Ct[i,2]*Ct[i,1]-0.00016*Ct[i,2]*Ct[i,0]+0.00366*Ct[i,2]*Ct[i,3] \
-                    -0.00382*Ct[i,2]*Ct[i,4]+0.00146*Ct[i,2]*Ct[i,5]+0.00031*Ct[i,1]*Ct[i,1]-0.00050*Ct[i,1]*Ct[i,0] \
-                    +0.02079*Ct[i,1]*Ct[i,3]-0.00222*Ct[i,1]*Ct[i,4]-0.00709*Ct[i,1]*Ct[i,5]+0.00045*Ct[i,0]*Ct[i,0] \
-                    +0.00588*Ct[i,0]*Ct[i,3]+0.01732*Ct[i,0]*Ct[i,4]-0.00223*Ct[i,0]*Ct[i,5]-0.12878*Ct[i,3]*Ct[i,3] \
-                    +0.09362*Ct[i,3]*Ct[i,4]-0.24968*Ct[i,3]*Ct[i,5]+0.08996*Ct[i,4]*Ct[i,4]+0.01747*Ct[i,4]*Ct[i,5] \
-                    +0.01161*Ct[i,5]*Ct[i,5]
-            Ct[i,3]=cmxw0+0.00068*Ct[i,1]-0.00015*Ct[i,2]+0.00010*Ct[i,0]-0.0073*Ct[i,4]+0.01998*Ct[i,5] \
-                    -0.00141*Ct[i,3]*Ct[i,3]-0.00067*Ct[i,3]*Ct[i,1]-0.00055*Ct[i,3]*Ct[i,2]+0.00016*Ct[i,3]*Ct[i,0] \
-                    -0.00475*Ct[i,3]*Ct[i,4]+0.00236*Ct[i,3]*Ct[i,5]-0.00001*Ct[i,1]*Ct[i,1]+0.00001*Ct[i,2]*Ct[i,1] \
-                    +0.00002*Ct[i,1]*Ct[i,0]+0.00025*Ct[i,1]*Ct[i,4]+0.00025*Ct[i,1]*Ct[i,5]-0.00003*Ct[i,2]*Ct[i,2] \
-                    +0.00002*Ct[i,2]*Ct[i,0]+0.00026*Ct[i,2]*Ct[i,4]+0.00004*Ct[i,2]*Ct[i,5]-0.00004*Ct[i,0]*Ct[i,0] \
-                    -0.00042*Ct[i,0]*Ct[i,4]+0.00023*Ct[i,0]*Ct[i,5]-0.00954*Ct[i,4]*Ct[i,4]-0.00136*Ct[i,4]*Ct[i,5] \
-                    +0.00219*Ct[i,5]*Ct[i,5]
-            Ct[i,4]=cmyw0-0.00007*Ct[i,1]+0.00227*Ct[i,2]+0.00113*Ct[i,3]-0.00012*Ct[i,0]+0.00488*Ct[i,5] \
-                    +0.00714*Ct[i,4]*Ct[i,4]+0.00000*Ct[i,4]*Ct[i,1]-0.00010*Ct[i,4]*Ct[i,2]-0.00955*Ct[i,4]*Ct[i,3] \
-                    +0.00158*Ct[i,0]*Ct[i,0]-0.00279*Ct[i,4]*Ct[i,5]+0.00001*Ct[i,1]*Ct[i,1]+0.00058*Ct[i,1]*Ct[i,3] \
-                    -0.00035*Ct[i,1]*Ct[i,5]+0.00001*Ct[i,2]*Ct[i,2]-0.00035*Ct[i,2]*Ct[i,3]-0.00005*Ct[i,2]*Ct[i,0] \
-                    -0.00006*Ct[i,2]*Ct[i,5]-0.00180*Ct[i,3]*Ct[i,3]+0.00022*Ct[i,3]*Ct[i,0]-0.02256*Ct[i,3]*Ct[i,5] \
-                    -0.00005*Ct[i,0]*Ct[i,0]+0.00090*Ct[i,0]*Ct[i,5]-0.00117*Ct[i,5]*Ct[i,5]
-            Ct[i,5]=cmzw0+0.00041*Ct[i,1]-0.00087*Ct[i,2]-0.05093*Ct[i,3]-0.03029*Ct[i,4]+0.00121*Ct[i,0] \
-                    -0.00147*Ct[i,5]*Ct[i,5]-0.00009*Ct[i,5]*Ct[i,1]+0.00000*Ct[i,5]*Ct[i,2]+0.00302*Ct[i,5]*Ct[i,3] \
-                    -0.00159*Ct[i,5]*Ct[i,4]+0.00169*Ct[i,5]*Ct[i,0]-0.00019*Ct[i,1]*Ct[i,3]-0.00007*Ct[i,1]*Ct[i,4] \
-                    +0.00001*Ct[i,1]*Ct[i,0]-0.00001*Ct[i,2]*Ct[i,2]+0.00035*Ct[i,2]*Ct[i,3]+0.00011*Ct[i,2]*Ct[i,4] \
-                    +0.00001*Ct[i,2]*Ct[i,0]-0.00497*Ct[i,3]*Ct[i,3]+0.01545*Ct[i,3]*Ct[i,4]-0.00069*Ct[i,3]*Ct[i,0] \
-                    -0.00108*Ct[i,4]*Ct[i,4]+0.00031*Ct[i,4]*Ct[i,5]+0.00001*Ct[i,0]*Ct[i,0]
+    def setBodyFile(self, bodyFile):
+        self._bodyFile = bodyFile
 
-    
-        Ctw[i,0]=Ct[i,0]*0.95
-        Ctw[i,1]=Ct[i,1]*0.98
-        Ctw[i,2]=Ct[i,2]
-        Ctw[i,3]=Ct[i,3]+Ct[i,2]*dy-Ct[i,1]*dz
-        Ctw[i,4]=Ct[i,4]-Ct[i,0]*dz-Ct[i,2]*dx
-        Ctw[i,5]=(Ct[i,5]+Ct[i,0]*dy+Ct[i,1]*dx)*0.56
+    def setAeroFile(self, aeroFile):
+        self._aeroFile = aeroFile
 
-    
-        Cq[i,0]=cosd(aeroAngle[i,0])*cosd(aeroAngle[i,1])*Ctw[i,0]+sind(aeroAngle[i,0])*cosd(aeroAngle[i,1])*Ctw[i,1] \
-                -sind(aeroAngle[i,1])*Ctw[i,2]
-        Cq[i,1]=-sind(aeroAngle[i,0])*Ctw[i,0]+cosd(aeroAngle[i,0])*Ctw[i,1]
-        Cq[i,2]=cosd(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,0]+sind(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,1] \
-                +cosd(aeroAngle[i,1])*Ctw[i,2]
-        Cq[i,3]=cosd(aeroAngle[i,0])*cosd(aeroAngle[i,1])*Ctw[i,3]-sind(aeroAngle[i,0])*cosd(aeroAngle[i,0])*Ctw[i,4] \
-                +sind(aeroAngle[i,1])*Ctw[i,5]
-        Cq[i,4]=sind(aeroAngle[i,0])*Ctw[i,3]+cosd(aeroAngle[i,0])*Ctw[i,4]
-        Cq[i,5]=-cosd(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,3]+sind(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,4] \
-                +cosd(aeroAngle[i,1])*Ctw[i,5]
+    def setHeaderRows(self, headerRows):
+        self._headerRows = headerRows
 
-        aeroCoe[i,0]=Cq[i,0]*9.8/(q*s)
-        aeroCoe[i,1]=Cq[i,1]*9.8/(q*s)
-        aeroCoe[i,2]=Cq[i,2]*9.8/(q*s)
-        aeroCoe[i,3]=Cq[i,3]*9.8/(q*s*l)
-        aeroCoe[i,4]=Cq[i,4]*9.8/(q*s*l)
-        aeroCoe[i,5]=Cq[i,5]*9.8/(q*s*ba)
+    def setFooterRows(self, footerRows):
+        self._footerRows = footerRows
 
-        bodyCoe[i,0]=Ctw[i,0]*9.8/(q*s)
-        bodyCoe[i,1]=Ctw[i,1]*9.8/(q*s)
-        bodyCoe[i,2]=Ctw[i,2]*9.8/(q*s)
-        bodyCoe[i,3]=Ctw[i,3]*9.8/(q*s*l)
-        bodyCoe[i,4]=Ctw[i,4]*9.8/(q*s*l)
-        bodyCoe[i,5]=Ctw[i,5]*9.8/(q*s*ba)
+    def setAngleStartCol(self, angleStartCol):
+        self._angleStartCol = angleStartCol
 
-        t = np.linspace(0.001,m/1000.,m)
-        with open(bodyFile,"w") as f:
-            #f.write("%d\t\t\t%d\n" % (m,n+5))
-            f.write("%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t\n" \
-                    %("Time","α","β","φ","θ","CA","CN","CY","Cl","Cn","Cm"))
-            for i in xrange(m):
-                f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
-                        % (t[i],aeroAngle[i,0],aeroAngle[i,1],aeroAngle[i,2],aeroAngle[i,3],bodyCoe[i,0],bodyCoe[i,1],bodyCoe[i,2],bodyCoe[i,3],bodyCoe[i,4],bodyCoe[i,5]))
-            f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
-                    % (t[m-1]+0.001,aeroAngle[0,0],aeroAngle[0,1],aeroAngle[0,2],aeroAngle[0,3],bodyCoe[0,0],bodyCoe[0,1],bodyCoe[0,2],bodyCoe[0,3],bodyCoe[0,4],bodyCoe[0,5]))
+    def setAngleEndCol(self, angleEndCol):
+        self._angleEndCol = angleEndCol
 
-        with open(aeroFile,"w") as f:
-            #f.write("%d\t\t\t%d\n" % (m,n+5))
-            f.write("%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t\n" \
-                    %("Time","α","β","φ","θ","CA","CN","CY","Cl","Cn","Cm"))
-            for i in xrange(m):
-                f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
-                        % (t[i],aeroAngle[i,0],aeroAngle[i,1],aeroAngle[i,2],aeroAngle[i,3],aeroCoe[i,0],aeroCoe[i,1],aeroCoe[i,2],aeroCoe[i,3],aeroCoe[i,4],aeroCoe[i,5]))
-            f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
-                    % (t[m-1]+0.001,aeroAngle[0,0],aeroAngle[0,1],aeroAngle[0,2],aeroAngle[0,3],aeroCoe[0,0],aeroCoe[0,1],aeroCoe[0,2],aeroCoe[0,3],aeroCoe[0,4],aeroCoe[0,5]))
+    def setForceStartCol(self, forceStartCol):
+        self._forceStartCol = forceStartCol
+
+    def setForceEndCol(self, forceEndCol):
+        self._forceEndCol = forceEndCol
+
+    def setAircraftModel(self, aircraftModel=None):
+        if aircraftModel is not None:
+            self._V = aircraftModel.V
+            self._S = aircraftModel.Area
+            self._L = aircraftModel.Span
+            self._rootChord = aircraftModel.RootChord
+            self._refChord = aircraftModel.RefChord
+            self._FlowPressure = aircraftModel.FlowPressure
+            self._dx = aircraftModel.dx
+            self._dy = aircraftModel.dy
+            self._dz = aircraftModel.dz
+
+    def transData(self):
+        pass
+
+
+class BalanceG18(Balance):
+    # def __init__(self):
+    #     super(self, BalanceG18).__init__()
+
+    def transData(self):
+        # aircraft's area, characteristic chord, free flow pressure, dx, dy, dz, air speed:V, flow pressure.
+        s = self._S                     # unit: m2
+        l = self._L                     # unit: m
+        ba = self._refChord             # unit: pa
+        dx = self._dx                   # unit: m
+        dy = self._dy                   # unit: m
+        dz = self._dz                   # unit: m
+        V = self._V                           # unit: m/s
+        q = 0.5 * AIR_DENSITY * V ** 2  # unit: pa
+
+        staFile = self._staFile         # static file's name
+        dynFile = self._dynFile         # dynamic file's name
+        bodyFile = self._bodyFile       # body file's name
+        aeroFile = self._aeroFile       # aero file's name
+
+        headerRows = self._headerRows  # data file's header nums
+        footerRows = self._footerRows  # data file's footer nums
+        angleStartCol = self._angleStartCol  # angle start column
+        angleEndCol = self._angleEndCol  # angle end column
+        angleCols = angleEndCol - angleStartCol + 1  # angle columns
+        forceStartCol = self._forceStartCol  # force and moment start column
+        forceEndCol = self._forceEndCol  # force and moment end column
+        forceCols = forceEndCol - forceStartCol + 1  # force and moment columns
+
+        #load static file and dynamic file
+        staData = genfromtxt(fname=staFile, skip_header=headerRows, skip_footer=footerRows)
+        dynData = genfromtxt(fname=dynFile, skip_header=headerRows, skip_footer=footerRows)
+        staAngle, staForce = staData[:, (angleStartCol - 1):angleEndCol], staData[:, (forceStartCol - 1):forceEndCol]
+        dynAngle, dynForce = dynData[:, (angleStartCol - 1):angleEndCol], dynData[:, (forceStartCol - 1):forceEndCol]
+        staAngleR, dynAngleR = deg2rad(staAngle), deg2rad(dynAngle)  # change the degrees to radius
+        angle = (staAngle + dynAngle) / 2.
+        angleR = (staAngleR + dynAngleR) / 2.
+        m, n = staData.shape
+        # read the file's headers and footers
+        rawList = open(staFile).readlines()
+        headerList = rawList[:headerRows] if headerRows else []
+        footerList = rawList[-footerRows:] if footerRows else []
+
+        #calculate the "body frame"'s fore and moment's coefficient
+        Fe = dynForce - staForce  # Fe: the raw Force and moment of Balance at the "Body frame"in the experiment
+        Fbb = zeros(shape=(m, forceCols))  # Fbb: Force and moment of Balance at the "Body frame"
+
+        Fbb[:, 0] = 6.11960 * Fe[:, 0]
+        Fbb[:, 1] = 12.33276 * Fe[:, 1]
+        Fbb[:, 2] = 4.76279 * Fe[:, 2]
+        Fbb[:, 3] = 0.38218 * Fe[:, 3]
+        Fbb[:, 4] = 0.19456 * Fe[:, 4]
+        Fbb[:, 5] = 0.69732 * Fe[:, 5]
+        for i in range(100):
+            Fbb[:, 0] = 6.11960 * Fe[:, 0] + \
+                0.00548 * Fbb[:, 1] + 0.10290 * Fbb[:, 2] + 0.12796 * Fbb[:, 3] + 1.03638 * Fbb[:,4] - 0.21182 * Fbb[:, 5] + \
+                0.00090 * Fbb[:, 0] * Fbb[:, 0] - 0.00023 * Fbb[:, 0] * Fbb[:, 1] + 0.00034 * Fbb[:, 0] * Fbb[:, 2] + \
+                0.00198 * Fbb[:, 0] * Fbb[:, 3] + 0.00447 * Fbb[:, 0] * Fbb[:, 4] - 0.00065 * Fbb[:, 0] * Fbb[:, 5] - \
+                0.00001 * Fbb[:, 1] * Fbb[:, 2] - 0.00444 * Fbb[:, 1] * Fbb[:, 3] - 0.00041 * Fbb[:, 1] * Fbb[:, 4] + \
+                0.00512 * Fbb[:, 1] * Fbb[:, 5] + 0.00014 * Fbb[:, 2] * Fbb[:, 2] - 0.00243 * Fbb[:, 2] * Fbb[:, 3] - \
+                0.00292 * Fbb[:, 2] * Fbb[:, 4] + 0.00033 * Fbb[:, 2] * Fbb[:, 5] - 0.31818 * Fbb[:, 3] * Fbb[:, 3] + \
+                0.04225 * Fbb[:, 3] * Fbb[:, 4] + 0.27065 * Fbb[:, 3] * Fbb[:, 5] - 0.02223 * Fbb[:, 4] * Fbb[:, 4] - \
+                0.01045 * Fbb[:, 4] * Fbb[:, 5] - 0.02171 * Fbb[:, 5] * Fbb[:, 5]
+            Fbb[:, 1] = 12.33276 * Fe[:, 1] - \
+                0.01686 * Fbb[:, 0] + 0.01297 * Fbb[:, 2] - 0.23388 * Fbb[:, 3] - 0.19139 * Fbb[:, 4] + 0.18227 * Fbb[:, 5] - \
+                0.00010 * Fbb[:, 1] * Fbb[:, 1] - 0.00010 * Fbb[:, 1] * Fbb[:, 0] + 0.00004 * Fbb[:, 1] * Fbb[:, 2] - \
+                0.00274 * Fbb[:, 1] * Fbb[:, 3] + 0.00056 * Fbb[:, 1] * Fbb[:, 4] + 0.00107 * Fbb[:, 1] * Fbb[:, 5] + \
+                0.00045 * Fbb[:, 0] * Fbb[:, 0] + 0.00030 * Fbb[:, 0] * Fbb[:, 2] + 0.00077 * Fbb[:, 0] * Fbb[:, 3] + \
+                0.00181 * Fbb[:, 0] * Fbb[:, 4] - 0.00549 * Fbb[:, 0] * Fbb[:, 5] - 0.00006 * Fbb[:, 2] * Fbb[:, 2] - \
+                0.01497 * Fbb[:, 2] * Fbb[:, 3] + 0.00340 * Fbb[:, 2] * Fbb[:, 4] + 0.00213 * Fbb[:, 2] * Fbb[:, 5] - \
+                0.03901 * Fbb[:, 3] * Fbb[:, 3] - 0.15065 * Fbb[:, 3] * Fbb[:, 4] + 0.02407 * Fbb[:, 3] * Fbb[:, 5] + \
+                0.00754 * Fbb[:, 4] * Fbb[:, 4] + 0.02244 * Fbb[:, 4] * Fbb[:, 5] - 0.01096 * Fbb[:, 5] * Fbb[:, 5]
+            Fbb[:, 2] = 4.76279 * Fe[:, 2] - \
+                0.02295 * Fbb[:, 1] + 0.00338 * Fbb[:, 0] - 0.17365 * Fbb[:, 3] - 0.36139 * Fbb[:, 4] + 0.00857 * Fbb[:, 5] + \
+                0.00032 * Fbb[:, 2] * Fbb[:, 2] - 0.00009 * Fbb[:, 2] * Fbb[:, 1] - 0.00016 * Fbb[:, 2] * Fbb[:, 0] + \
+                0.00366 * Fbb[:, 2] * Fbb[:, 3] - 0.00382 * Fbb[:, 2] * Fbb[:, 4] + 0.00146 * Fbb[:, 2] * Fbb[:, 5] + \
+                0.00031 * Fbb[:, 1] * Fbb[:, 1] - 0.00050 * Fbb[:, 1] * Fbb[:, 0] + 0.02079 * Fbb[:, 1] * Fbb[:, 3] - \
+                0.00222 * Fbb[:, 1] * Fbb[:, 4] - 0.00709 * Fbb[:, 1] * Fbb[:, 5] + 0.00045 * Fbb[:, 0] * Fbb[:, 0] + \
+                0.00588 * Fbb[:, 0] * Fbb[:, 3] + 0.01732 * Fbb[:, 0] * Fbb[:, 4] - 0.00223 * Fbb[:, 0] * Fbb[:, 5] - \
+                0.12878 * Fbb[:, 3] * Fbb[:, 3] + 0.09362 * Fbb[:, 3] * Fbb[:, 4] - 0.24968 * Fbb[:, 3] * Fbb[:, 5] + \
+                0.08996 * Fbb[:, 4] * Fbb[:, 4] + 0.01747 * Fbb[:, 4] * Fbb[:, 5] + 0.01161 * Fbb[:, 5] * Fbb[:, 5]
+            Fbb[:, 3] = 0.38218 * Fe[:, 3] + \
+                0.00068 * Fbb[:, 1] - 0.00015 * Fbb[:, 2] + 0.00010 * Fbb[:, 0] - 0.0073 * Fbb[:, 4] + 0.01998 * Fbb[:, 5] - \
+                0.00141 * Fbb[:, 3] * Fbb[:, 3] - 0.00067 * Fbb[:, 3] * Fbb[:, 1] - 0.00055 * Fbb[:, 3] * Fbb[:, 2] + \
+                0.00016 * Fbb[:, 3] * Fbb[:, 0] - 0.00475 * Fbb[:, 3] * Fbb[:, 4] + 0.00236 * Fbb[:, 3] * Fbb[:, 5] - \
+                0.00001 * Fbb[:, 1] * Fbb[:, 1] + 0.00001 * Fbb[:, 2] * Fbb[:, 1] + 0.00002 * Fbb[:, 1] * Fbb[:, 0] + \
+                0.00025 * Fbb[:, 1] * Fbb[:, 4] + 0.00025 * Fbb[:, 1] * Fbb[:, 5] - 0.00003 * Fbb[:, 2] * Fbb[:, 2] + \
+                0.00002 * Fbb[:, 2] * Fbb[:, 0] + 0.00026 * Fbb[:, 2] * Fbb[:, 4] + 0.00004 * Fbb[:, 2] * Fbb[:, 5] - \
+                0.00004 * Fbb[:, 0] * Fbb[:, 0] - 0.00042 * Fbb[:, 0] * Fbb[:, 4] + 0.00023 * Fbb[:, 0] * Fbb[:, 5] - \
+                0.00954 * Fbb[:, 4] * Fbb[:, 4] - 0.00136 * Fbb[:, 4] * Fbb[:, 5] + 0.00219 * Fbb[:, 5] * Fbb[:, 5]
+            Fbb[:, 4] = 0.19456 * Fe[:, 4] - \
+                0.00007 * Fbb[:, 1] + 0.00227 * Fbb[:, 2] + 0.00113 * Fbb[:, 3] - 0.00012 * Fbb[:, 0] + 0.00488 * Fbb[:, 5] + \
+                0.00714 * Fbb[:, 4] * Fbb[:, 4] + 0.00000 * Fbb[:, 4] * Fbb[:, 1] - 0.00010 * Fbb[:, 4] * Fbb[:, 2] - \
+                0.00955 * Fbb[:, 4] * Fbb[:, 3] + 0.00158 * Fbb[:, 0] * Fbb[:, 0] - 0.00279 * Fbb[:, 4] * Fbb[:, 5] + \
+                0.00001 * Fbb[:, 1] * Fbb[:, 1] + 0.00058 * Fbb[:, 1] * Fbb[:, 3] - 0.00035 * Fbb[:, 1] * Fbb[:, 5] + \
+                0.00001 * Fbb[:, 2] * Fbb[:, 2] - 0.00035 * Fbb[:, 2] * Fbb[:, 3] - 0.00005 * Fbb[:, 2] * Fbb[:, 0] - \
+                0.00006 * Fbb[:, 2] * Fbb[:, 5] - 0.00180 * Fbb[:, 3] * Fbb[:, 3] + 0.00022 * Fbb[:, 3] * Fbb[:, 0] - \
+                0.02256 * Fbb[:, 3] * Fbb[:, 5] - 0.00005 * Fbb[:, 0] * Fbb[:, 0] + 0.00090 * Fbb[:, 0] * Fbb[:, 5] - \
+                0.00117 * Fbb[:, 5] * Fbb[:, 5]
+            Fbb[:, 5] = 0.69732 * Fe[:, 5] + \
+                0.00041 * Fbb[:, 1] - 0.00087 * Fbb[:, 2] - 0.05093 * Fbb[:, 3] - 0.03029 * Fbb[:, 4] + 0.00121 * Fbb[:, 0] - \
+                0.00147 * Fbb[:, 5] * Fbb[:, 5] - 0.00009 * Fbb[:, 5] * Fbb[:, 1] + 0.00000 * Fbb[:, 5] * Fbb[:, 2] + \
+                0.00302 * Fbb[:, 5] * Fbb[:, 3] - 0.00159 * Fbb[:, 5] * Fbb[:, 4] + 0.00169 * Fbb[:, 5] * Fbb[:, 0] - \
+                0.00019 * Fbb[:, 1] * Fbb[:, 3] - 0.00007 * Fbb[:, 1] * Fbb[:, 4] + 0.00001 * Fbb[:, 1] * Fbb[:, 0] - \
+                0.00001 * Fbb[:, 2] * Fbb[:, 2] + 0.00035 * Fbb[:, 2] * Fbb[:, 3] + 0.00011 * Fbb[:, 2] * Fbb[:, 4] + \
+                0.00001 * Fbb[:, 2] * Fbb[:, 0] - 0.00497 * Fbb[:, 3] * Fbb[:, 3] + 0.01545 * Fbb[:, 3] * Fbb[:, 4] - \
+                0.00069 * Fbb[:, 3] * Fbb[:, 0] - 0.00108 * Fbb[:, 4] * Fbb[:, 4] + 0.00031 * Fbb[:, 4] * Fbb[:, 5] + \
+                0.00001 * Fbb[:, 0] * Fbb[:, 0]
+
+
+        #the balance's "body frame" data translation to aircraft 's "body frame"
+        Fb = zeros(shape=(m, forceCols))  # Fb: Force and moment of aircraft at the "Body frame"
+        Fb[:, 0] = Fbb[:, 0] * 0.95
+        Fb[:, 1] = Fbb[:, 1] * 0.98
+        Fb[:, 2] = Fbb[:, 2]
+        Fb[:, 3] = Fbb[:, 3] + Fbb[:, 2] * dy - Fbb[:, 1] * dz
+        Fb[:, 4] = Fbb[:, 4] - Fbb[:, 0] * dz - Fbb[:, 2] * dx
+        Fb[:, 5] = (Fbb[:, 5] + Fbb[:, 0] * dy + Fbb[:, 1] * dx) * 0.56
+
+        #calculate the aero data
+        Fa = zeros(shape=(m, forceCols))  # Fa: aero's Force and moment
+        Fa[:, 0] = cos(angleR[:, 0]) * cos(angleR[:, 1]) * Fb[:, 0] + sin(angleR[:, 0]) * cos(angleR[:, 1]) * Fb[:, 1] - sin(angleR[:, 1]) * Fb[:, 2]
+        Fa[:, 1] = - sin(angleR[:, 0]) * Fb[:, 0] + cos(angleR[:, 0]) * Fb[:, 1]
+        Fa[:, 2] = cos(angleR[:, 0]) * sin(angleR[:, 1]) * Fb[:, 0] + sin(angleR[:, 0]) * sin(angleR[:, 1]) * Fb[:, 1] + cos(angleR[:, 1]) * Fb[:, 2]
+        Fa[:, 3] = cos(angleR[:, 0]) * cos(angleR[:, 1]) * Fb[:, 3] - sin(angleR[:, 0]) * cos(angleR[:, 0]) * Fb[:, 4] + sin(angleR[:, 1]) * Fb[:, 5]
+        Fa[:, 4] = sin(angleR[:, 0]) * Fb[:, 3] + cos(angleR[:, 0]) * Fb[:, 4]
+        Fa[:, 5] = - cos(angleR[:, 0]) * sin(angleR[:, 1]) * Fb[:, 3] + sin(angleR[:, 0]) * sin(angleR[:, 1]) * Fb[:, 4] + cos(angleR[:, 1]) * Fb[:, 5]
+
+        # Cb: Coefficient of force and moment at the Body frame
+        Cb = zeros(shape=(m, forceCols))
+        Cb[:, :3] = Fb[:, :3] * 9.8 / (q * s)
+        Cb[:, 3:5] = Fb[:, 3:5] * 9.8 / (q * s * l)
+        Cb[:, 5] = Fb[:, 5] * 9.8 / (q * s * ba)
+        # Ca: Coefficient of force and moment at the Aero frame
+        Ca = zeros(shape=(m, forceCols))
+        Ca[:, :3] = Fa[:, :3] * 9.8 / (q * s)
+        Ca[:, 3:5] = Fa[:, 3:5] * 9.8 / (q * s * l)
+        Ca[:, 5] = Fa[:, 5] * 9.8 / (q * s * ba)
+
+        Mb = hstack((angle, Cb))
+        Ma = hstack((angle, Ca))
+
+        savetxt(bodyFile, Mb, fmt='%-15.8f',
+                header=''.join(headerList).strip(),
+                footer=''.join(footerList).strip(),
+                comments='')
+        savetxt(aeroFile, Ma, fmt='%-15.8f',
+                header=''.join(headerList).strip(),
+                footer=''.join(footerList).strip(),
+                comments='')
+
+
+class BalanceG16(Balance):
+    # def __init__(self):
+    #     super(self, BalanceG16).__init__(self)
+
+    def transData(self):
+        # aircraft's area, characteristic chord, free flow pressure, dx, dy, dz, air speed:V, flow pressure.
+        s = self._S                     # unit: m2
+        l = self._L                     # unit: m
+        ba = self._refChord             # unit: pa
+        dx = self._dx                   # unit: m
+        dy = self._dy                   # unit: m
+        dz = self._dz                   # unit: m
+        V = self._V                           # unit: m/s
+        q = 0.5 * AIR_DENSITY * V ** 2  # unit: pa
+
+        staFile = self._staFile         # static file's name
+        dynFile = self._dynFile         # dynamic file's name
+        bodyFile = self._bodyFile       # body file's name
+        aeroFile = self._aeroFile       # aero file's name
+
+        headerRows = self._headerRows  # data file's header nums
+        footerRows = self._footerRows  # data file's footer nums
+        angleStartCol = self._angleStartCol  # angle start column
+        angleEndCol = self._angleEndCol  # angle end column
+        angleCols = angleEndCol - angleStartCol + 1  # angle columns
+        forceStartCol = self._forceStartCol  # force and moment start column
+        forceEndCol = self._forceEndCol  # force and moment end column
+        forceCols = forceEndCol - forceStartCol + 1  # force and moment columns
+
+        #load static file and dynamic file
+        staData = genfromtxt(fname=staFile, skip_header=headerRows, skip_footer=footerRows)
+        dynData = genfromtxt(fname=dynFile, skip_header=headerRows, skip_footer=footerRows)
+        staAngle, staForce = staData[:, (angleStartCol - 1):angleEndCol], staData[:, (forceStartCol - 1):forceEndCol]
+        dynAngle, dynForce = dynData[:, (angleStartCol - 1):angleEndCol], dynData[:, (forceStartCol - 1):forceEndCol]
+        staAngleR, dynAngleR = deg2rad(staAngle), deg2rad(dynAngle)  # change the degrees to radius
+        angle = (staAngle + dynAngle) / 2.
+        angleR = (staAngleR + dynAngleR) / 2.
+        m, n = staData.shape
+        # read the file's headers and footers
+        rawList = open(staFile).readlines()
+        headerList = rawList[:headerRows] if headerRows else []
+        footerList = rawList[-footerRows:] if footerRows else []
+
+        #calculate the "body frame"'s fore and moment's coefficient
+        Fe = dynForce - staForce  # Fe: the raw Force and moment of Balance at the "Body frame"in the experiment
+        Fbb = zeros(shape=(m, forceCols))  # Fbb: Force and moment of Balance at the "Body frame"
+
+        Fbb[:, 0] = 0.2554675*Fe[:, 0] - 0.0154822*Fe[:, 1] + 0.00390868*Fe[:, 2] - 0.0051715*Fe[:, 3] - \
+            0.00178511*Fe[:, 4] - 0.0024596*Fe[:, 5]
+        Fbb[:, 1] = 0.00068324*Fe[:, 0] + 0.6661034*Fe[:, 1] + 0.0120892*Fe[:, 2] - 0.0109143*Fe[:, 3] + \
+            0.0391122*Fe[:, 4] + 0.0151383*Fe[:, 5]
+        Fbb[:, 2] = 0.00096904*Fe[:, 0] + 0.00120306*Fe[:, 1] + 0.585989*Fe[:, 2] + 0.027769*Fe[:, 3] + \
+            0.014161*Fe[:, 4] + 0.00452654*Fe[:, 5]
+        Fbb[:, 3] = 0.000095445*Fe[:, 0] + 0.00029407*Fe[:, 1] + 0.00726843*Fe[:, 2] + 0.03304980*Fe[:, 3] + \
+            0.0082689*Fe[:, 4] + 0.000152507*Fe[:, 5]
+        Fbb[:, 4] = -0.00036007*Fe[:, 0] - 0.00009756*Fe[:, 1] + 0.00098957*Fe[:, 2] + 0.00055426*Fe[:, 3] + \
+            0.02351212*Fe[:, 4] - 0.000134249*Fe[:, 5]
+        Fbb[:, 5] = -0.000025559*Fe[:, 0] + 0.00075648*Fe[:, 1] + 0.000344149*Fe[:, 2] - 0.000585242*Fe[:, 3] - \
+            0.0022913*Fe[:, 4] + 0.0276978*Fe[:, 5]
+
+        #the balance's "body frame" data translation to aircraft 's "body frame"
+        Fb = zeros(shape=(m, forceCols))   # Fb: Force and moment of aircraft at the "Body frame"
+        Fb[:, 3] = Fbb[:, 3] + Fbb[:, 2]*dy - Fbb[:, 1]*dz
+        Fb[:, 4] = Fbb[:, 4] - Fbb[:, 0]*dz - Fbb[:, 2]*dx
+        Fb[:, 5] = Fbb[:, 5] + Fbb[:, 0]*dy + Fbb[:, 1]*dx
+
+        #calculate the aero data
+        Fa = zeros(shape=(m, forceCols))  # Fa: aero's Force and moment
+        Fa[:, 0] = cos(angleR[:, 0])*cos(angleR[:, 1])*Fb[:, 0] + sin(angleR[:, 0])*cos(angleR[:, 1])*Fb[:, 1] - sin(angleR[:, 1])*Fb[:, 2]
+        Fa[:, 1] = - sin(angleR[:, 0])*Fb[:, 0] + cos(angleR[:, 0])*Fb[:, 1]
+        Fa[:, 2] = cos(angleR[:, 0])*sin(angleR[:, 1])*Fb[:, 0] + sin(angleR[:, 0])*sin(angleR[:, 1])*Fb[:, 1] + cos(angleR[:, 1])*Fb[:, 2]
+        Fa[:, 3] = cos(angleR[:, 0])*cos(angleR[:, 1])*Fb[:, 3] - sin(angleR[:, 0])*cos(angleR[:, 0])*Fb[:, 4] + sin(angleR[:, 1])*Fb[:, 5]
+        Fa[:, 4] = sin(angleR[:, 0])*Fb[:, 3] + cos(angleR[:, 0])*Fb[:, 4]
+        Fa[:, 5] = - cos(angleR[:, 0])*sin(angleR[:, 1])*Fb[:, 3] + sin(angleR[:, 0])*sin(angleR[:, 1])*Fb[:, 4] + cos(angleR[:, 1])*Fb[:, 5]
+
+        # Cb: Coefficient of force and moment at the Body frame
+        Cb = zeros(shape=(m, forceCols))
+        Cb[:, :3] = Fb[:, :3] * 9.8 / (q * s)
+        Cb[:, 3:5] = Fb[:, 3:5] * 9.8 / (q * s * l)
+        Cb[:, 5] = Fb[:, 5] * 9.8 / (q * s * ba)
+        # Ca: Coefficient of force and moment at the Aero frame
+        Ca = zeros(shape=(m, forceCols))
+        Ca[:, :3] = Fa[:, :3] * 9.8 / (q * s)
+        Ca[:, 3:5] = Fa[:, 3:5] * 9.8 / (q * s * l)
+        Ca[:, 5] = Fa[:, 5] * 9.8 / (q * s * ba)
+
+        Mb = hstack((angle, Cb))
+        Ma = hstack((angle, Ca))
+
+        savetxt(bodyFile, Mb, fmt='%-15.8f',
+                header=''.join(headerList).strip(),
+                footer=''.join(footerList).strip(),
+                comments='')
+        savetxt(aeroFile, Ma, fmt='%-15.8f',
+                header=''.join(headerList).strip(),
+                footer=''.join(footerList).strip(),
+                comments='')
+# def BalanceG18(staFile='', dynFile='', aeroFile='', bodyFile='',
+#                headerRows=1, phi0=0, aircraftModel=None):
+#
+#     _dx = aircraftModel.BalanceDeltaX
+#     _dy = aircraftModel.BalanceDeltaY
+#     _dz = aircraftModel.BalanceDeltaZ
+#     q = aircraftModel._FlowPressure
+#     s = aircraftModel.Area
+#     l = aircraftModel.Span
+#     ba = aircraftModel.RefChord
+#
+#     jf = open(staFile,'r')
+#     df = open(dynFile,'r')
+#     jdata = np.loadtxt(jf.readlines()[headerRows:], dtype=np.float)
+#     ddata = np.loadtxt(df.readlines()[headerRows:], dtype=np.float)
+#     jf.close()
+#     df.close()
+#
+#     angle = jdata[:,1:5]
+#     Cy = jdata[:,5:11]
+#     Cn = ddata[:,5:11]
+#     Cy=Cy-Cn
+#     aeroAngle = np.zeros_like(angle)
+#     Ct=np.zeros_like(Cy)
+#     Ctw=np.zeros_like(Cy)
+#     Cq=np.zeros_like(Cy)
+#     aeroCoe = np.zeros_like(Cy)
+#     bodyCoe = np.zeros_like(Cy)
+#     m, = angle.shape
+#     t = np.linspace(0.001,m/1000,m)
+#
+#     for i in xrange(m):
+#         aeroAngle[i,0] = atand((sind(angle[i,0])*cosd(angle[i,2])-cosd(angle[i,0])*sind(angle[i,1])*sind(angle[i,2]))/(cosd(angle[i,0])*cosd(angle[i,1])))
+#         aeroAngle[i,1]=asind(sind(angle[i,0])*sind(angle[i,2])+cosd(angle[i,0])*sind(angle[i,1])*cosd(angle[i,2]))
+#         aeroAngle[i,2]=angle[i,2]+phi0
+#         aeroAngle[i,3]=angle[i,3]
+#
+#         cxw0=6.11960*Cy[i,0]
+#         cyw0=12.33276*Cy[i,1]
+#         czw0=4.76279*Cy[i,2]
+#         cmxw0=0.38218*Cy[i,3]
+#         cmyw0=0.19456*Cy[i,4]
+#         cmzw0=0.69732*Cy[i,5]
+#         Ct[i,0]=cxw0
+#         Ct[i,1]=cyw0
+#         Ct[i,2]=czw0
+#         Ct[i,3]=cmxw0
+#         Ct[i,4]=cmyw0
+#         Ct[i,5]=cmzw0
+#         for k in xrange(100):
+#             Ct[i,0]=cxw0+0.00548*Ct[i,1]+0.10290*Ct[i,2]+0.12796*Ct[i,3]+1.03638*Ct[i,4]-0.21182*Ct[i,5] \
+#                     +0.00090*Ct[i,0]*Ct[i,0]-0.00023*Ct[i,0]*Ct[i,1]+0.00034*Ct[i,0]*Ct[i,2]+0.00198*Ct[i,0]*Ct[i,3] \
+#                     +0.00447*Ct[i,0]*Ct[i,4]-0.00065*Ct[i,0]*Ct[i,5]-0.00001*Ct[i,1]*Ct[i,2]-0.00444*Ct[i,1]*Ct[i,3] \
+#                     -0.00041*Ct[i,1]*Ct[i,4]+0.00512*Ct[i,1]*Ct[i,5]+0.00014*Ct[i,2]*Ct[i,2]-0.00243*Ct[i,2]*Ct[i,3] \
+#                     -0.00292*Ct[i,2]*Ct[i,4]+0.00033*Ct[i,2]*Ct[i,5]-0.31818*Ct[i,3]*Ct[i,3]+0.04225*Ct[i,3]*Ct[i,4] \
+#                     +0.27065*Ct[i,3]*Ct[i,5]-0.02223*Ct[i,4]*Ct[i,4]-0.01045*Ct[i,4]*Ct[i,5]-0.02171*Ct[i,5]*Ct[i,5]
+#             Ct[i,1]=cyw0-0.01686*Ct[i,0]+0.01297*Ct[i,2]-0.23388*Ct[i,3]-0.19139*Ct[i,4]+0.18227*Ct[i,5] \
+#                     -0.00010*Ct[i,1]*Ct[i,1]-0.00010*Ct[i,1]*Ct[i,0]+0.00004*Ct[i,1]*Ct[i,2]-0.00274*Ct[i,1]*Ct[i,3] \
+#                     +0.00056*Ct[i,1]*Ct[i,4]+0.00107*Ct[i,1]*Ct[i,5]+0.00045*Ct[i,0]*Ct[i,0]+0.00030*Ct[i,0]*Ct[i,2] \
+#                     +0.00077*Ct[i,0]*Ct[i,3]+0.00181*Ct[i,0]*Ct[i,4]-0.00549*Ct[i,0]*Ct[i,5]-0.00006*Ct[i,2]*Ct[i,2] \
+#                     -0.01497*Ct[i,2]*Ct[i,3]+0.00340*Ct[i,2]*Ct[i,4]+0.00213*Ct[i,2]*Ct[i,5]-0.03901*Ct[i,3]*Ct[i,3] \
+#                     -0.15065*Ct[i,3]*Ct[i,4]+0.02407*Ct[i,3]*Ct[i,5]+0.00754*Ct[i,4]*Ct[i,4]+0.02244*Ct[i,4]*Ct[i,5] \
+#                     -0.01096*Ct[i,5]*Ct[i,5]
+#             Ct[i,2]=czw0-0.02295*Ct[i,1]+0.00338*Ct[i,0]-0.17365*Ct[i,3]-0.36139*Ct[i,4]+0.00857*Ct[i,5] \
+#                     +0.00032*Ct[i,2]*Ct[i,2]-0.00009*Ct[i,2]*Ct[i,1]-0.00016*Ct[i,2]*Ct[i,0]+0.00366*Ct[i,2]*Ct[i,3] \
+#                     -0.00382*Ct[i,2]*Ct[i,4]+0.00146*Ct[i,2]*Ct[i,5]+0.00031*Ct[i,1]*Ct[i,1]-0.00050*Ct[i,1]*Ct[i,0] \
+#                     +0.02079*Ct[i,1]*Ct[i,3]-0.00222*Ct[i,1]*Ct[i,4]-0.00709*Ct[i,1]*Ct[i,5]+0.00045*Ct[i,0]*Ct[i,0] \
+#                     +0.00588*Ct[i,0]*Ct[i,3]+0.01732*Ct[i,0]*Ct[i,4]-0.00223*Ct[i,0]*Ct[i,5]-0.12878*Ct[i,3]*Ct[i,3] \
+#                     +0.09362*Ct[i,3]*Ct[i,4]-0.24968*Ct[i,3]*Ct[i,5]+0.08996*Ct[i,4]*Ct[i,4]+0.01747*Ct[i,4]*Ct[i,5] \
+#                     +0.01161*Ct[i,5]*Ct[i,5]
+#             Ct[i,3]=cmxw0+0.00068*Ct[i,1]-0.00015*Ct[i,2]+0.00010*Ct[i,0]-0.0073*Ct[i,4]+0.01998*Ct[i,5] \
+#                     -0.00141*Ct[i,3]*Ct[i,3]-0.00067*Ct[i,3]*Ct[i,1]-0.00055*Ct[i,3]*Ct[i,2]+0.00016*Ct[i,3]*Ct[i,0] \
+#                     -0.00475*Ct[i,3]*Ct[i,4]+0.00236*Ct[i,3]*Ct[i,5]-0.00001*Ct[i,1]*Ct[i,1]+0.00001*Ct[i,2]*Ct[i,1] \
+#                     +0.00002*Ct[i,1]*Ct[i,0]+0.00025*Ct[i,1]*Ct[i,4]+0.00025*Ct[i,1]*Ct[i,5]-0.00003*Ct[i,2]*Ct[i,2] \
+#                     +0.00002*Ct[i,2]*Ct[i,0]+0.00026*Ct[i,2]*Ct[i,4]+0.00004*Ct[i,2]*Ct[i,5]-0.00004*Ct[i,0]*Ct[i,0] \
+#                     -0.00042*Ct[i,0]*Ct[i,4]+0.00023*Ct[i,0]*Ct[i,5]-0.00954*Ct[i,4]*Ct[i,4]-0.00136*Ct[i,4]*Ct[i,5] \
+#                     +0.00219*Ct[i,5]*Ct[i,5]
+#             Ct[i,4]=cmyw0-0.00007*Ct[i,1]+0.00227*Ct[i,2]+0.00113*Ct[i,3]-0.00012*Ct[i,0]+0.00488*Ct[i,5] \
+#                     +0.00714*Ct[i,4]*Ct[i,4]+0.00000*Ct[i,4]*Ct[i,1]-0.00010*Ct[i,4]*Ct[i,2]-0.00955*Ct[i,4]*Ct[i,3] \
+#                     +0.00158*Ct[i,0]*Ct[i,0]-0.00279*Ct[i,4]*Ct[i,5]+0.00001*Ct[i,1]*Ct[i,1]+0.00058*Ct[i,1]*Ct[i,3] \
+#                     -0.00035*Ct[i,1]*Ct[i,5]+0.00001*Ct[i,2]*Ct[i,2]-0.00035*Ct[i,2]*Ct[i,3]-0.00005*Ct[i,2]*Ct[i,0] \
+#                     -0.00006*Ct[i,2]*Ct[i,5]-0.00180*Ct[i,3]*Ct[i,3]+0.00022*Ct[i,3]*Ct[i,0]-0.02256*Ct[i,3]*Ct[i,5] \
+#                     -0.00005*Ct[i,0]*Ct[i,0]+0.00090*Ct[i,0]*Ct[i,5]-0.00117*Ct[i,5]*Ct[i,5]
+#             Ct[i,5]=cmzw0+0.00041*Ct[i,1]-0.00087*Ct[i,2]-0.05093*Ct[i,3]-0.03029*Ct[i,4]+0.00121*Ct[i,0] \
+#                     -0.00147*Ct[i,5]*Ct[i,5]-0.00009*Ct[i,5]*Ct[i,1]+0.00000*Ct[i,5]*Ct[i,2]+0.00302*Ct[i,5]*Ct[i,3] \
+#                     -0.00159*Ct[i,5]*Ct[i,4]+0.00169*Ct[i,5]*Ct[i,0]-0.00019*Ct[i,1]*Ct[i,3]-0.00007*Ct[i,1]*Ct[i,4] \
+#                     +0.00001*Ct[i,1]*Ct[i,0]-0.00001*Ct[i,2]*Ct[i,2]+0.00035*Ct[i,2]*Ct[i,3]+0.00011*Ct[i,2]*Ct[i,4] \
+#                     +0.00001*Ct[i,2]*Ct[i,0]-0.00497*Ct[i,3]*Ct[i,3]+0.01545*Ct[i,3]*Ct[i,4]-0.00069*Ct[i,3]*Ct[i,0] \
+#                     -0.00108*Ct[i,4]*Ct[i,4]+0.00031*Ct[i,4]*Ct[i,5]+0.00001*Ct[i,0]*Ct[i,0]
+#
+#
+#         Ctw[i,0]=Ct[i,0]*0.95
+#         Ctw[i,1]=Ct[i,1]*0.98
+#         Ctw[i,2]=Ct[i,2]
+#         Ctw[i,3]=Ct[i,3]+Ct[i,2]*_dy-Ct[i,1]*_dz
+#         Ctw[i,4]=Ct[i,4]-Ct[i,0]*_dz-Ct[i,2]*_dx
+#         Ctw[i,5]=(Ct[i,5]+Ct[i,0]*_dy+Ct[i,1]*_dx)*0.56
+#
+#
+#         Cq[i,0]=cosd(aeroAngle[i,0])*cosd(aeroAngle[i,1])*Ctw[i,0]+sind(aeroAngle[i,0])*cosd(aeroAngle[i,1])*Ctw[i,1] \
+#                 -sind(aeroAngle[i,1])*Ctw[i,2]
+#         Cq[i,1]=-sind(aeroAngle[i,0])*Ctw[i,0]+cosd(aeroAngle[i,0])*Ctw[i,1]
+#         Cq[i,2]=cosd(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,0]+sind(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,1] \
+#                 +cosd(aeroAngle[i,1])*Ctw[i,2]
+#         Cq[i,3]=cosd(aeroAngle[i,0])*cosd(aeroAngle[i,1])*Ctw[i,3]-sind(aeroAngle[i,0])*cosd(aeroAngle[i,0])*Ctw[i,4] \
+#                 +sind(aeroAngle[i,1])*Ctw[i,5]
+#         Cq[i,4]=sind(aeroAngle[i,0])*Ctw[i,3]+cosd(aeroAngle[i,0])*Ctw[i,4]
+#         Cq[i,5]=-cosd(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,3]+sind(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,4] \
+#                 +cosd(aeroAngle[i,1])*Ctw[i,5]
+#
+#         aeroCoe[i,0]=Cq[i,0]*9.8/(q*s)
+#         aeroCoe[i,1]=Cq[i,1]*9.8/(q*s)
+#         aeroCoe[i,2]=Cq[i,2]*9.8/(q*s)
+#         aeroCoe[i,3]=Cq[i,3]*9.8/(q*s*l)
+#         aeroCoe[i,4]=Cq[i,4]*9.8/(q*s*l)
+#         aeroCoe[i,5]=Cq[i,5]*9.8/(q*s*ba)
+#
+#         bodyCoe[i,0]=Ctw[i,0]*9.8/(q*s)
+#         bodyCoe[i,1]=Ctw[i,1]*9.8/(q*s)
+#         bodyCoe[i,2]=Ctw[i,2]*9.8/(q*s)
+#         bodyCoe[i,3]=Ctw[i,3]*9.8/(q*s*l)
+#         bodyCoe[i,4]=Ctw[i,4]*9.8/(q*s*l)
+#         bodyCoe[i,5]=Ctw[i,5]*9.8/(q*s*ba)
+#
+#         t = np.linspace(0.001,m/1000.,m)
+#         with open(bodyFile,"w") as f:
+#             #f.write("%d\t\t\t%d\n" % (m,n+5))
+#             f.write("%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t\n" \
+#                     %("Time","α","β","φ","θ","CA","CN","CY","Cl","Cn","Cm"))
+#             for i in xrange(m):
+#                 f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
+#                         % (t[i],aeroAngle[i,0],aeroAngle[i,1],aeroAngle[i,2],aeroAngle[i,3],bodyCoe[i,0],bodyCoe[i,1],bodyCoe[i,2],bodyCoe[i,3],bodyCoe[i,4],bodyCoe[i,5]))
+#             f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
+#                     % (t[m-1]+0.001,aeroAngle[0,0],aeroAngle[0,1],aeroAngle[0,2],aeroAngle[0,3],bodyCoe[0,0],bodyCoe[0,1],bodyCoe[0,2],bodyCoe[0,3],bodyCoe[0,4],bodyCoe[0,5]))
+#
+#         with open(aeroFile,"w") as f:
+#             #f.write("%d\t\t\t%d\n" % (m,n+5))
+#             f.write("%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t\n" \
+#                     %("Time","α","β","φ","θ","CA","CN","CY","Cl","Cn","Cm"))
+#             for i in xrange(m):
+#                 f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
+#                         % (t[i],aeroAngle[i,0],aeroAngle[i,1],aeroAngle[i,2],aeroAngle[i,3],aeroCoe[i,0],aeroCoe[i,1],aeroCoe[i,2],aeroCoe[i,3],aeroCoe[i,4],aeroCoe[i,5]))
+#             f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
+#                     % (t[m-1]+0.001,aeroAngle[0,0],aeroAngle[0,1],aeroAngle[0,2],aeroAngle[0,3],aeroCoe[0,0],aeroCoe[0,1],aeroCoe[0,2],aeroCoe[0,3],aeroCoe[0,4],aeroCoe[0,5]))
 
 class DynamicRig(object):
-    def __init__(self,samplingRate=1000,kineticsFre=0.2,kineticsSty=DYN_PITCH):
+    def __init__(self, samplingRate=1000, kineticsFre=0.2, kineticsSty=DYN_PITCH):
         self.SampleRate = samplingRate
         self.KineticsFre = kineticsFre
         self.KineticsSty = kineticsSty
@@ -317,9 +610,10 @@ class DataFileInfo(object):
 
         return index*0.2
 
-class DataFrDynRig(DynamicRig):
+
+class DataFromDynRig(DynamicRig):
     def __init__(self, filePath='', sampleRate=1000., kineticsFre=0.2):
-        super(DataFrDynRig, self).__init__(sampleRate, kineticsFre)
+        super(DataFromDynRig, self).__init__(sampleRate, kineticsFre)
         self.FilePath = filePath
         self.CirlePts = int(1./self.KineticsFre*self.SampleRate)
 
@@ -332,7 +626,7 @@ class DataFrDynRig(DynamicRig):
 
     def getMaxPts(self):
         rawData = self.getRawData()
-        maxPoint =  self.IgnorePts - 1    #计算第一个周期中的最高点数（起始位置），第n个点在数组中的位置为n-1
+        maxPoint = self.IgnorePts - 1    # 计算第一个周期中的最高点数（起始位置），第n个点在数组中的位置为n-1
         if DYN_PITCH == self.KineticsSty:
             i = 1
         elif DYN_YAW == self.KineticsSty:
@@ -348,11 +642,11 @@ class DataFrDynRig(DynamicRig):
         else:
             ans = angle.getYawAngle() + angle.getAmAngle()
         print ans
-        while rawData[maxPoint,i] < ans*0.85:
-            maxPoint+=1
-        while rawData[maxPoint,i] <= rawData[maxPoint + 1,i]:
-            maxPoint+=1
-        print 'MaxPoints:',maxPoint+1,'MaxAngle:', rawData[maxPoint,i]
+        while rawData[maxPoint, i] < ans*0.85:
+            maxPoint += 1
+        while rawData[maxPoint, i] <= rawData[maxPoint + 1, i]:
+            maxPoint += 1
+        print 'MaxPoints:', maxPoint+1, 'MaxAngle:', rawData[maxPoint, i]
         return maxPoint+1   # 结果返回最大点的位置，是因为Python的点数索引从0开始。
 
     def getBinPts(self):
@@ -427,7 +721,7 @@ def main():
         kineticsFre = info.getKineticsFre()
         kineticsSty = info.getKineticsSty()
         phi0 = info.getRollAngle()
-        dataObj = DataFrDynRig(filePath=staFile, sampleRate=1000,kineticsFre=kineticsFre)
+        dataObj = DataFromDynRig(filePath=staFile, sampleRate=1000,kineticsFre=kineticsFre)
         dataObj.setKineticsSty(kineticsSty)
         dataObj.setDataFileFormat(headerRows=1,ignorePts=200)
         angle = dataObj.getAngleData()

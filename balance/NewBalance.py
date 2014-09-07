@@ -621,16 +621,16 @@ def BalG18_2(angle,staData,dynData,aeroFile='',bodyFile='',headerRows =1,phi0=0,
     #                     -0.00108*Ct[i,4]*Ct[i,4]+0.00031*Ct[i,4]*Ct[i,5]+0.00001*Ct[i,0]*Ct[i,0]
     #
     #     bCoe=np.zeros_like(Ct)
-    #     dx = self.AirCraftModel.BalanceDeltaX
-    #     dy = self.AirCraftModel.BalanceDeltaY
-    #     dz = self.AirCraftModel.BalanceDeltaZ
+    #     _dx = self.AirCraftModel._dx
+    #     _dy = self.AirCraftModel._dy
+    #     _dz = self.AirCraftModel._dz
     #     for i in xrange(m):
     #         bCoe[i,0]=Ct[i,0]*0.95
     #         bCoe[i,1]=Ct[i,1]*0.98
     #         bCoe[i,2]=Ct[i,2]
-    #         bCoe[i,3]=Ct[i,3]+Ct[i,2]*dy-Ct[i,1]*dz
-    #         bCoe[i,4]=Ct[i,4]-Ct[i,0]*dz-Ct[i,2]*dx
-    #         bCoe[i,5]=(Ct[i,5]+Ct[i,0]*dy+Ct[i,1]*dx)*0.56
+    #         bCoe[i,3]=Ct[i,3]+Ct[i,2]*_dy-Ct[i,1]*_dz
+    #         bCoe[i,4]=Ct[i,4]-Ct[i,0]*_dz-Ct[i,2]*_dx
+    #         bCoe[i,5]=(Ct[i,5]+Ct[i,0]*_dy+Ct[i,1]*_dx)*0.56
     #
     #     return  bCoe
     #
@@ -655,7 +655,7 @@ def BalG18_2(angle,staData,dynData,aeroFile='',bodyFile='',headerRows =1,phi0=0,
     #     return aCoe
     # def getForceAndMoment(self,coe):
     #
-    #     q = self.AirCraftModel.FlowPressure
+    #     q = self.AirCraftModel._FlowPressure
     #     s = self.AirCraftModel.Area
     #     l = self.AirCraftModel.Span
     #     ba = self.AirCraftModel.RefChord
