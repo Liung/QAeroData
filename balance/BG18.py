@@ -72,8 +72,7 @@ class Balance(object):
         self._dx = 0.
         self._dy = 0.
         self._dz = 0.
-        if aircraftModel is not None:
-            self.setAircraftModel(aircraftModel)
+        self.setAircraftModel(aircraftModel)
 
     def setStaFile(self, staFile):
         self._staFile = staFile
@@ -230,7 +229,6 @@ class BalanceG18(Balance):
                 0.00069 * Fbb[:, 3] * Fbb[:, 0] - 0.00108 * Fbb[:, 4] * Fbb[:, 4] + 0.00031 * Fbb[:, 4] * Fbb[:, 5] + \
                 0.00001 * Fbb[:, 0] * Fbb[:, 0]
 
-
         #the balance's "body frame" data translation to aircraft 's "body frame"
         Fb = zeros(shape=(m, forceCols))  # Fb: Force and moment of aircraft at the "Body frame"
         Fb[:, 0] = Fbb[:, 0] * 0.95
@@ -370,150 +368,6 @@ class BalanceG16(Balance):
                 header=''.join(headerList).strip(),
                 footer=''.join(footerList).strip(),
                 comments='')
-# def BalanceG18(staFile='', dynFile='', aeroFile='', bodyFile='',
-#                headerRows=1, phi0=0, aircraftModel=None):
-#
-#     _dx = aircraftModel.BalanceDeltaX
-#     _dy = aircraftModel.BalanceDeltaY
-#     _dz = aircraftModel.BalanceDeltaZ
-#     q = aircraftModel._FlowPressure
-#     s = aircraftModel.Area
-#     l = aircraftModel.Span
-#     ba = aircraftModel.RefChord
-#
-#     jf = open(staFile,'r')
-#     df = open(dynFile,'r')
-#     jdata = np.loadtxt(jf.readlines()[headerRows:], dtype=np.float)
-#     ddata = np.loadtxt(df.readlines()[headerRows:], dtype=np.float)
-#     jf.close()
-#     df.close()
-#
-#     angle = jdata[:,1:5]
-#     Cy = jdata[:,5:11]
-#     Cn = ddata[:,5:11]
-#     Cy=Cy-Cn
-#     aeroAngle = np.zeros_like(angle)
-#     Ct=np.zeros_like(Cy)
-#     Ctw=np.zeros_like(Cy)
-#     Cq=np.zeros_like(Cy)
-#     aeroCoe = np.zeros_like(Cy)
-#     bodyCoe = np.zeros_like(Cy)
-#     m, = angle.shape
-#     t = np.linspace(0.001,m/1000,m)
-#
-#     for i in xrange(m):
-#         aeroAngle[i,0] = atand((sind(angle[i,0])*cosd(angle[i,2])-cosd(angle[i,0])*sind(angle[i,1])*sind(angle[i,2]))/(cosd(angle[i,0])*cosd(angle[i,1])))
-#         aeroAngle[i,1]=asind(sind(angle[i,0])*sind(angle[i,2])+cosd(angle[i,0])*sind(angle[i,1])*cosd(angle[i,2]))
-#         aeroAngle[i,2]=angle[i,2]+phi0
-#         aeroAngle[i,3]=angle[i,3]
-#
-#         cxw0=6.11960*Cy[i,0]
-#         cyw0=12.33276*Cy[i,1]
-#         czw0=4.76279*Cy[i,2]
-#         cmxw0=0.38218*Cy[i,3]
-#         cmyw0=0.19456*Cy[i,4]
-#         cmzw0=0.69732*Cy[i,5]
-#         Ct[i,0]=cxw0
-#         Ct[i,1]=cyw0
-#         Ct[i,2]=czw0
-#         Ct[i,3]=cmxw0
-#         Ct[i,4]=cmyw0
-#         Ct[i,5]=cmzw0
-#         for k in xrange(100):
-#             Ct[i,0]=cxw0+0.00548*Ct[i,1]+0.10290*Ct[i,2]+0.12796*Ct[i,3]+1.03638*Ct[i,4]-0.21182*Ct[i,5] \
-#                     +0.00090*Ct[i,0]*Ct[i,0]-0.00023*Ct[i,0]*Ct[i,1]+0.00034*Ct[i,0]*Ct[i,2]+0.00198*Ct[i,0]*Ct[i,3] \
-#                     +0.00447*Ct[i,0]*Ct[i,4]-0.00065*Ct[i,0]*Ct[i,5]-0.00001*Ct[i,1]*Ct[i,2]-0.00444*Ct[i,1]*Ct[i,3] \
-#                     -0.00041*Ct[i,1]*Ct[i,4]+0.00512*Ct[i,1]*Ct[i,5]+0.00014*Ct[i,2]*Ct[i,2]-0.00243*Ct[i,2]*Ct[i,3] \
-#                     -0.00292*Ct[i,2]*Ct[i,4]+0.00033*Ct[i,2]*Ct[i,5]-0.31818*Ct[i,3]*Ct[i,3]+0.04225*Ct[i,3]*Ct[i,4] \
-#                     +0.27065*Ct[i,3]*Ct[i,5]-0.02223*Ct[i,4]*Ct[i,4]-0.01045*Ct[i,4]*Ct[i,5]-0.02171*Ct[i,5]*Ct[i,5]
-#             Ct[i,1]=cyw0-0.01686*Ct[i,0]+0.01297*Ct[i,2]-0.23388*Ct[i,3]-0.19139*Ct[i,4]+0.18227*Ct[i,5] \
-#                     -0.00010*Ct[i,1]*Ct[i,1]-0.00010*Ct[i,1]*Ct[i,0]+0.00004*Ct[i,1]*Ct[i,2]-0.00274*Ct[i,1]*Ct[i,3] \
-#                     +0.00056*Ct[i,1]*Ct[i,4]+0.00107*Ct[i,1]*Ct[i,5]+0.00045*Ct[i,0]*Ct[i,0]+0.00030*Ct[i,0]*Ct[i,2] \
-#                     +0.00077*Ct[i,0]*Ct[i,3]+0.00181*Ct[i,0]*Ct[i,4]-0.00549*Ct[i,0]*Ct[i,5]-0.00006*Ct[i,2]*Ct[i,2] \
-#                     -0.01497*Ct[i,2]*Ct[i,3]+0.00340*Ct[i,2]*Ct[i,4]+0.00213*Ct[i,2]*Ct[i,5]-0.03901*Ct[i,3]*Ct[i,3] \
-#                     -0.15065*Ct[i,3]*Ct[i,4]+0.02407*Ct[i,3]*Ct[i,5]+0.00754*Ct[i,4]*Ct[i,4]+0.02244*Ct[i,4]*Ct[i,5] \
-#                     -0.01096*Ct[i,5]*Ct[i,5]
-#             Ct[i,2]=czw0-0.02295*Ct[i,1]+0.00338*Ct[i,0]-0.17365*Ct[i,3]-0.36139*Ct[i,4]+0.00857*Ct[i,5] \
-#                     +0.00032*Ct[i,2]*Ct[i,2]-0.00009*Ct[i,2]*Ct[i,1]-0.00016*Ct[i,2]*Ct[i,0]+0.00366*Ct[i,2]*Ct[i,3] \
-#                     -0.00382*Ct[i,2]*Ct[i,4]+0.00146*Ct[i,2]*Ct[i,5]+0.00031*Ct[i,1]*Ct[i,1]-0.00050*Ct[i,1]*Ct[i,0] \
-#                     +0.02079*Ct[i,1]*Ct[i,3]-0.00222*Ct[i,1]*Ct[i,4]-0.00709*Ct[i,1]*Ct[i,5]+0.00045*Ct[i,0]*Ct[i,0] \
-#                     +0.00588*Ct[i,0]*Ct[i,3]+0.01732*Ct[i,0]*Ct[i,4]-0.00223*Ct[i,0]*Ct[i,5]-0.12878*Ct[i,3]*Ct[i,3] \
-#                     +0.09362*Ct[i,3]*Ct[i,4]-0.24968*Ct[i,3]*Ct[i,5]+0.08996*Ct[i,4]*Ct[i,4]+0.01747*Ct[i,4]*Ct[i,5] \
-#                     +0.01161*Ct[i,5]*Ct[i,5]
-#             Ct[i,3]=cmxw0+0.00068*Ct[i,1]-0.00015*Ct[i,2]+0.00010*Ct[i,0]-0.0073*Ct[i,4]+0.01998*Ct[i,5] \
-#                     -0.00141*Ct[i,3]*Ct[i,3]-0.00067*Ct[i,3]*Ct[i,1]-0.00055*Ct[i,3]*Ct[i,2]+0.00016*Ct[i,3]*Ct[i,0] \
-#                     -0.00475*Ct[i,3]*Ct[i,4]+0.00236*Ct[i,3]*Ct[i,5]-0.00001*Ct[i,1]*Ct[i,1]+0.00001*Ct[i,2]*Ct[i,1] \
-#                     +0.00002*Ct[i,1]*Ct[i,0]+0.00025*Ct[i,1]*Ct[i,4]+0.00025*Ct[i,1]*Ct[i,5]-0.00003*Ct[i,2]*Ct[i,2] \
-#                     +0.00002*Ct[i,2]*Ct[i,0]+0.00026*Ct[i,2]*Ct[i,4]+0.00004*Ct[i,2]*Ct[i,5]-0.00004*Ct[i,0]*Ct[i,0] \
-#                     -0.00042*Ct[i,0]*Ct[i,4]+0.00023*Ct[i,0]*Ct[i,5]-0.00954*Ct[i,4]*Ct[i,4]-0.00136*Ct[i,4]*Ct[i,5] \
-#                     +0.00219*Ct[i,5]*Ct[i,5]
-#             Ct[i,4]=cmyw0-0.00007*Ct[i,1]+0.00227*Ct[i,2]+0.00113*Ct[i,3]-0.00012*Ct[i,0]+0.00488*Ct[i,5] \
-#                     +0.00714*Ct[i,4]*Ct[i,4]+0.00000*Ct[i,4]*Ct[i,1]-0.00010*Ct[i,4]*Ct[i,2]-0.00955*Ct[i,4]*Ct[i,3] \
-#                     +0.00158*Ct[i,0]*Ct[i,0]-0.00279*Ct[i,4]*Ct[i,5]+0.00001*Ct[i,1]*Ct[i,1]+0.00058*Ct[i,1]*Ct[i,3] \
-#                     -0.00035*Ct[i,1]*Ct[i,5]+0.00001*Ct[i,2]*Ct[i,2]-0.00035*Ct[i,2]*Ct[i,3]-0.00005*Ct[i,2]*Ct[i,0] \
-#                     -0.00006*Ct[i,2]*Ct[i,5]-0.00180*Ct[i,3]*Ct[i,3]+0.00022*Ct[i,3]*Ct[i,0]-0.02256*Ct[i,3]*Ct[i,5] \
-#                     -0.00005*Ct[i,0]*Ct[i,0]+0.00090*Ct[i,0]*Ct[i,5]-0.00117*Ct[i,5]*Ct[i,5]
-#             Ct[i,5]=cmzw0+0.00041*Ct[i,1]-0.00087*Ct[i,2]-0.05093*Ct[i,3]-0.03029*Ct[i,4]+0.00121*Ct[i,0] \
-#                     -0.00147*Ct[i,5]*Ct[i,5]-0.00009*Ct[i,5]*Ct[i,1]+0.00000*Ct[i,5]*Ct[i,2]+0.00302*Ct[i,5]*Ct[i,3] \
-#                     -0.00159*Ct[i,5]*Ct[i,4]+0.00169*Ct[i,5]*Ct[i,0]-0.00019*Ct[i,1]*Ct[i,3]-0.00007*Ct[i,1]*Ct[i,4] \
-#                     +0.00001*Ct[i,1]*Ct[i,0]-0.00001*Ct[i,2]*Ct[i,2]+0.00035*Ct[i,2]*Ct[i,3]+0.00011*Ct[i,2]*Ct[i,4] \
-#                     +0.00001*Ct[i,2]*Ct[i,0]-0.00497*Ct[i,3]*Ct[i,3]+0.01545*Ct[i,3]*Ct[i,4]-0.00069*Ct[i,3]*Ct[i,0] \
-#                     -0.00108*Ct[i,4]*Ct[i,4]+0.00031*Ct[i,4]*Ct[i,5]+0.00001*Ct[i,0]*Ct[i,0]
-#
-#
-#         Ctw[i,0]=Ct[i,0]*0.95
-#         Ctw[i,1]=Ct[i,1]*0.98
-#         Ctw[i,2]=Ct[i,2]
-#         Ctw[i,3]=Ct[i,3]+Ct[i,2]*_dy-Ct[i,1]*_dz
-#         Ctw[i,4]=Ct[i,4]-Ct[i,0]*_dz-Ct[i,2]*_dx
-#         Ctw[i,5]=(Ct[i,5]+Ct[i,0]*_dy+Ct[i,1]*_dx)*0.56
-#
-#
-#         Cq[i,0]=cosd(aeroAngle[i,0])*cosd(aeroAngle[i,1])*Ctw[i,0]+sind(aeroAngle[i,0])*cosd(aeroAngle[i,1])*Ctw[i,1] \
-#                 -sind(aeroAngle[i,1])*Ctw[i,2]
-#         Cq[i,1]=-sind(aeroAngle[i,0])*Ctw[i,0]+cosd(aeroAngle[i,0])*Ctw[i,1]
-#         Cq[i,2]=cosd(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,0]+sind(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,1] \
-#                 +cosd(aeroAngle[i,1])*Ctw[i,2]
-#         Cq[i,3]=cosd(aeroAngle[i,0])*cosd(aeroAngle[i,1])*Ctw[i,3]-sind(aeroAngle[i,0])*cosd(aeroAngle[i,0])*Ctw[i,4] \
-#                 +sind(aeroAngle[i,1])*Ctw[i,5]
-#         Cq[i,4]=sind(aeroAngle[i,0])*Ctw[i,3]+cosd(aeroAngle[i,0])*Ctw[i,4]
-#         Cq[i,5]=-cosd(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,3]+sind(aeroAngle[i,0])*sind(aeroAngle[i,1])*Ctw[i,4] \
-#                 +cosd(aeroAngle[i,1])*Ctw[i,5]
-#
-#         aeroCoe[i,0]=Cq[i,0]*9.8/(q*s)
-#         aeroCoe[i,1]=Cq[i,1]*9.8/(q*s)
-#         aeroCoe[i,2]=Cq[i,2]*9.8/(q*s)
-#         aeroCoe[i,3]=Cq[i,3]*9.8/(q*s*l)
-#         aeroCoe[i,4]=Cq[i,4]*9.8/(q*s*l)
-#         aeroCoe[i,5]=Cq[i,5]*9.8/(q*s*ba)
-#
-#         bodyCoe[i,0]=Ctw[i,0]*9.8/(q*s)
-#         bodyCoe[i,1]=Ctw[i,1]*9.8/(q*s)
-#         bodyCoe[i,2]=Ctw[i,2]*9.8/(q*s)
-#         bodyCoe[i,3]=Ctw[i,3]*9.8/(q*s*l)
-#         bodyCoe[i,4]=Ctw[i,4]*9.8/(q*s*l)
-#         bodyCoe[i,5]=Ctw[i,5]*9.8/(q*s*ba)
-#
-#         t = np.linspace(0.001,m/1000.,m)
-#         with open(bodyFile,"w") as f:
-#             #f.write("%d\t\t\t%d\n" % (m,n+5))
-#             f.write("%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t\n" \
-#                     %("Time","α","β","φ","θ","CA","CN","CY","Cl","Cn","Cm"))
-#             for i in xrange(m):
-#                 f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
-#                         % (t[i],aeroAngle[i,0],aeroAngle[i,1],aeroAngle[i,2],aeroAngle[i,3],bodyCoe[i,0],bodyCoe[i,1],bodyCoe[i,2],bodyCoe[i,3],bodyCoe[i,4],bodyCoe[i,5]))
-#             f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
-#                     % (t[m-1]+0.001,aeroAngle[0,0],aeroAngle[0,1],aeroAngle[0,2],aeroAngle[0,3],bodyCoe[0,0],bodyCoe[0,1],bodyCoe[0,2],bodyCoe[0,3],bodyCoe[0,4],bodyCoe[0,5]))
-#
-#         with open(aeroFile,"w") as f:
-#             #f.write("%d\t\t\t%d\n" % (m,n+5))
-#             f.write("%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\t\n" \
-#                     %("Time","α","β","φ","θ","CA","CN","CY","Cl","Cn","Cm"))
-#             for i in xrange(m):
-#                 f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
-#                         % (t[i],aeroAngle[i,0],aeroAngle[i,1],aeroAngle[i,2],aeroAngle[i,3],aeroCoe[i,0],aeroCoe[i,1],aeroCoe[i,2],aeroCoe[i,3],aeroCoe[i,4],aeroCoe[i,5]))
-#             f.write("%-.3f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t%-15.8f\t\n" \
-#                     % (t[m-1]+0.001,aeroAngle[0,0],aeroAngle[0,1],aeroAngle[0,2],aeroAngle[0,3],aeroCoe[0,0],aeroCoe[0,1],aeroCoe[0,2],aeroCoe[0,3],aeroCoe[0,4],aeroCoe[0,5]))
 
 class DynamicRig(object):
     def __init__(self, samplingRate=1000, kineticsFre=0.2, kineticsSty=DYN_PITCH):
@@ -521,8 +375,8 @@ class DynamicRig(object):
         self.KineticsFre = kineticsFre
         self.KineticsSty = kineticsSty
 
-    def setOutputFileFormat(self,beginAngleColumn=1,stopAngleColumn=4,
-                            beginForceColumn=5,stopForceColumn=10):
+    def setOutputFileFormat(self,beginAngleColumn=1, stopAngleColumn=4,
+                            beginForceColumn=5, stopForceColumn=10):
         self.BeginAngleColumn = beginAngleColumn
         self.StopAngleColumn = stopAngleColumn
         self.BeginForceColumn = beginForceColumn
@@ -690,40 +544,39 @@ def searchFileIter(fileDir=''):
     fileDir = os.path.abspath(fileDir)
     os.chdir(fileDir)
     if os.path.isdir(fileDir):
-        jfileList = [item for item in os.listdir(fileDir)
-                        if string.lower(item).endswith('jf.txt')]
-        dfileList = [item for item in os.listdir(fileDir)
-                        if string.lower(item).endswith('df.txt')]
+        jfileList = [item for item in os.listdir(fileDir) if string.lower(item).endswith('jf.txt')]
+        dfileList = [item for item in os.listdir(fileDir) if string.lower(item).endswith('df.txt')]
         lowerJfileList = [string.lower(item) for item in jfileList]
         lowerDfileList = [string.lower(item) for item in dfileList]
-        for id1,lowerJfile in enumerate(lowerJfileList):
+        for id1, lowerJfile in enumerate(lowerJfileList):
             lowerDfile = lowerJfile.split('jf')[0] + 'df.txt'
             if lowerDfile in lowerDfileList:
                 id2 = lowerDfileList.index(lowerDfile)
-                yield os.path.abspath(jfileList[id1]),os.path.abspath(dfileList[id2])
+                yield os.path.abspath(jfileList[id1]), os.path.abspath(dfileList[id2])
+
 
 def main():
     saccon = AircraftModel(span=0.4, area=0.0521,
                            rootChord=0.2759, refChord=0.1246)
-    saccon.setWindSpeed(windSpeed=25)
-    saccon.setBalanceDistance(deltaX=0, deltaY=0, deltaZ=0)
+    saccon.setV(V=25)
+    saccon.setDelta(dx=0, dy=0, dz=0)
 
     fileDir = r"D:\Workspace\SACCON\20131223SACCON\Roll\Filter-Cutoff4-Order5"
-    newPath = os.path.join(fileDir,'Results')
+    newPath = os.path.join(fileDir, 'Results')
     print os.listdir(fileDir)
     if os.path.exists(newPath):
         shutil.rmtree(newPath)
     os.mkdir(newPath)
-    for staFile,dynFile in searchFileIter(fileDir):
+    for staFile, dynFile in searchFileIter(fileDir):
         #创建数据模型
         print staFile, '--->>', dynFile
         info = DataFileInfo(staFile)
         kineticsFre = info.getKineticsFre()
         kineticsSty = info.getKineticsSty()
         phi0 = info.getRollAngle()
-        dataObj = DataFromDynRig(filePath=staFile, sampleRate=1000,kineticsFre=kineticsFre)
+        dataObj = DataFromDynRig(filePath=staFile, sampleRate=1000, kineticsFre=kineticsFre)
         dataObj.setKineticsSty(kineticsSty)
-        dataObj.setDataFileFormat(headerRows=1,ignorePts=200)
+        dataObj.setDataFileFormat(headerRows=1, ignorePts=200)
         angle = dataObj.getAngleData()
         staCoe = dataObj.getAverageCoeData()
 
@@ -732,9 +585,9 @@ def main():
 
         tempFile = os.path.splitext(os.path.split(staFile)[1])
         aeroFile = tempFile[0].split('JF')[0] + 'FQ' + tempFile[1]
-        aeroFile = os.path.join(newPath,aeroFile)
+        aeroFile = os.path.join(newPath, aeroFile)
         bodyFile = tempFile[0].split('JF')[0] + 'FT' + tempFile[1]
-        bodyFile = os.path.join(newPath,bodyFile)
+        bodyFile = os.path.join(newPath, bodyFile)
 
         print aeroFile, '--->>', bodyFile
 
@@ -743,16 +596,16 @@ def main():
                              aircraftModel=saccon)
         balance.setPhi0(phi0)
         aeroAngle = balance.getAeroAngle(angle)
-        tempBodyData = balance.getTempBodyForceAndMoment(staData=staCoe,dynData=dynCoe)
-        tempAeroData = balance.getTempAeroForceAndMoment(aeroAngle,tempBodyData)
+        tempBodyData = balance.getTempBodyForceAndMoment(staData=staCoe, dynData=dynCoe)
+        tempAeroData = balance.getTempAeroForceAndMoment(aeroAngle, tempBodyData)
         bodyData = balance.getForceAndMoment(tempBodyData)
         aeroData = balance.getForceAndMoment(tempAeroData)
 
         balance.writeToFile(aeroAngle, bodyData, aeroData)
 if __name__ == '__main__':
     #创建一个SACCON模型
-	import profile
-	profile.run(main())
+    import profile
+    profile.run(main())
 
 
 
