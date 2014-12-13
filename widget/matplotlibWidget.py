@@ -6,14 +6,16 @@ import sys
 from PyQt4.QtGui import *
 import numpy as np
 from matplotlib.figure import Figure
+import seaborn as sns
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
+sns.set_context("notebook")
 
 class Qt4MplCanvas(FigureCanvas):
     def __init__(self, parent):
         self.fig = Figure()
-        self.fig.set_facecolor('#FFFFFF')
+        # self.fig.set_facecolor('#FFFFFF')
         self.axes = self.fig.add_subplot(111)
         self.axes.grid(True)
         # self.axes.legend()

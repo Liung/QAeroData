@@ -1,0 +1,1 @@
+c:\Anaconda\Lib\site-packages\PyQt4\pyrcc4.exe -o imgs_rc.py imgs.qrc

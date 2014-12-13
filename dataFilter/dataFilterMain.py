@@ -1,15 +1,15 @@
 #coding: UTF-8
 __author__ = 'Vincent'
-__appname__ = u'单文件滤波工具'
+__appname__ = u'单文件巴特沃斯低通滤波工具'
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-#import sys
 from dataFilterUi import Ui_dataFilter
 from dataFilter import DataFilter
 import sys
-sys.path.append("../widget")
+sys.path.append("..")
 from widget.matplotlibWidget import MatplotlibWidget
+
 
 class DataFilterWidget(QDialog, Ui_dataFilter):
     def __init__(self, parent=None):
@@ -23,6 +23,8 @@ class DataFilterWidget(QDialog, Ui_dataFilter):
         self.txtRawFile.setReadOnly(True)
         self.txtFilterFile.setReadOnly(True)
         self._dir = "./"
+        self._rawFile = ''
+        self._filterFile = ''
 
     @pyqtSignature("")
     def on_btnRawFile_clicked(self):
@@ -32,32 +34,45 @@ class DataFilterWidget(QDialog, Ui_dataFilter):
                                               selectedFilter=u"文本文件(*.txt)")
         if not rawFile.isEmpty():
             self._dir = rawFile  # 设置文件路径为当前选择目录
+            self._rawFile = unicode(rawFile)
             self.txtRawFile.setText(rawFile)
 
     @pyqtSignature("")
     def on_btnFilterFile_clicked(self):
-        filtFile = QFileDialog.getSaveFileName(self,
-                                               u"存储生成滤波之后的文件...", directory=self._dir,
-                                               filter=u"文本文件(*.txt);;数据文件(*.dat);;所有文件(*.*)",
-                                               selectedFilter=u"文本文件(*.txt)")
-        if not filtFile.isEmpty():
-            self._dir = filtFile  # 设置文件路径为当前选择目录
-            self.txtFilterFile.setText(filtFile)
+        filterFile = QFileDialog.getSaveFileName(self,
+                                                 u"存储生成滤波之后的文件...", directory=self._dir,
+                                                 filter=u"文本文件(*.txt);;数据文件(*.dat);;所有文件(*.*)",
+                                                 selectedFilter=u"文本文件(*.txt)")
+        if not filterFile.isEmpty():
+            self._dir = filterFile  # 设置文件路径为当前选择目录
+            self._filterFile = unicode(filterFile)
+            self.txtFilterFile.setText(filterFile)
 
     @pyqtSignature("")
     def on_btnFilterStart_clicked(self):
+
         samplingRate = float(self.txtSamplingRate.text())
         cutoffFre = float(self.txtCutoffFre.text())
-        rawFile = unicode(self.txtRawFile.text())
-        filtFile = unicode(self.txtFilterFile.text())
+        rawFile = self._rawFile
+        filterFile = self._filterFile
+        filtOrder = self.spbFilterOrders.value()
+
+        if rawFile == unicode("") or filterFile == unicode(""):
+            QMessageBox.warning(self, u"{0} -- {1}".format(unicode(qApp.applicationName()),
+                                                           __appname__),
+                                u"没有可用的滤波文件或滤波存储文件输入！")
+            return
+
         try:
-            filtOrder = self.spbFilterOrders.value()
-            dataFilter = DataFilter(samplingRate, filterOrder=filtOrder, cutoffFre=cutoffFre)
+            dataFilterObj = DataFilter(samplingRate, filterOrder=filtOrder, cutoffFre=cutoffFre)
             headerNums = self.spbFileHeaderNums.value()
-            dataFilter.setFileFormat(rawFile, filtFile, headerNums)
-            dataFilter.toDataFile()
+            dataFilterObj.setRawFile(rawFile)
+            dataFilterObj.setFiltFile(filterFile)
+            dataFilterObj.setHeaderRows(headerNums)
+            dataFilterObj.toDataFile()
+
             if self.chbFilterShow.isChecked():
-                mplTuple = dataFilter.showWidget(self)
+                mplTuple = dataFilterObj.showWidget(self)
                 for tab, mpl in zip([self.tabCx, self.tabCy, self.tabCz,
                                      self.tabCmx, self.tabCmy, self.tabCmz], mplTuple):
                     if tab.layout():    # 如果tab选项卡中存在布局管理器
@@ -73,13 +88,14 @@ class DataFilterWidget(QDialog, Ui_dataFilter):
                         tab.setLayout(lay)
                 self.mplTabWidget.setVisible(True)
                 self.mainLayout.setSizeConstraint(QLayout.SetDefaultConstraint)    # 将对话框尺寸策略改为默认
-            QMessageBox.about(self, u"{0} -- {1}".format(unicode(qApp.applicationName()),
-                                                         __appname__),
-                              u"滤波完成")
+            QMessageBox.warning(self, u"{0} -- {1}".format(unicode(qApp.applicationName()),
+                                                           __appname__),
+                                u"滤波完成")
         except Exception, msg:
-            QMessageBox.about(self, u"{0} -- {1}".format(unicode(qApp.applicationName()),
-                                                         __appname__),
-                              u"文件{0}滤波失败\n{1}".format(unicode(rawFile), msg))
+            QMessageBox.warning(self, u"{0} -- {1}".format(unicode(qApp.applicationName()),
+                                                           __appname__),
+                                u"文件{0}滤波失败\n{1}".format(unicode(rawFile), msg))
+            return
 
 
 if __name__ == "__main__":

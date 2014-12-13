@@ -1,6 +1,6 @@
 #coding: UTF-8
 __author__ = 'Vincent'
-__appname__ = u'批处理滤波工具'
+__appname__ = u'多文件巴特沃斯低通滤波工具'
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -8,9 +8,8 @@ import sys
 from dataFilterBatchUi import Ui_dataFilterBatch
 from dataFilter import DataFilter
 
-text = u'''<P>本工具支持批处理滤波文件。
-    <p>如果需要显示波形，则每次需要手动关闭波形图才能进行下一步的滤波处理。
-    所以，批处理时一般请不要勾选显示波形图。'''
+text = u'''<P>本工具支持批处理滤波文件。但文件滤波工具适用于单个文件滤波及参数调节；
+    <p>多文件滤波默认关闭波形图，以便节省内存，使滤波更快进行。'''
 
 
 class DataFilterBatchWidget(QDialog, Ui_dataFilterBatch):
@@ -46,8 +45,7 @@ class DataFilterBatchWidget(QDialog, Ui_dataFilterBatch):
                                                 selectedFilter=u"文本文件(*.txt)")
         if len(rawFiles) == 0:
             return
-        self.txtRawFiles.clear()
-        self._rawFiles = rawFiles
+
         self.txtRawFiles.addItems(rawFiles)
         self.updateFilterFiles()
 
@@ -55,41 +53,44 @@ class DataFilterBatchWidget(QDialog, Ui_dataFilterBatch):
     def on_btnBatchFilterFilesClear_clicked(self):
         self.txtRawFiles.clear()
         self.txtFilterFiles.clear()
-        self._rawFiles.clear()
 
     def updateFilterFiles(self):
-        if len(self._rawFiles) == 0 or \
+
+        if self.txtRawFiles.count() == 0 or \
                 self.txtFilterFilesDirectory.text().isEmpty():
             return
         self.txtFilterFiles.clear()
-        for fn in self._rawFiles:
+        for i in range(self.txtRawFiles.count()):
+            fn = self.txtRawFiles.item(i).text()
             rawFn = QFileInfo(fn)
             tempFn = rawFn.completeBaseName() + "F." + rawFn.suffix().toLower()
             newDir = self.txtFilterFilesDirectory.text()
             newFn = newDir + '\\' + tempFn
-            self._filterFiles.append(newFn)
             item = QListWidgetItem(newFn)
             self.txtFilterFiles.addItem(item)
         return
 
     @pyqtSignature("")
     def on_btnBatchFilterStart_clicked(self):
+
         if self.txtRawFiles.count() == 0:
-            QMessageBox.about(self, u"{0} -- {1}".format(qApp.applicationName(),
-                                                         __appname__),
-                              u"请输入滤波文件列表")
             return
+
         if self.txtFilterFilesDirectory.text().isEmpty():
             QMessageBox.warning(self, u"{0} -- {1}".format(qApp.applicationName(),
                                                            __appname__),
                                 u"请选择一个滤波后文件的存储目录")
             return
+
+        # starting data-filting
         try:
             sampleRate = float(self.txtBatchSampleRate.text())
             cutoffFre = float(self.txtBatchCutoffFre.text())
-            fileNums = len(self._filterFiles)
+
             filterOrder = self.spbBatchFilterOrders.value()
             headerNums = self.spbFilterHeaderNums.value()
+
+            fileNums = self.txtRawFiles.count()
 
             progress = QProgressDialog(self)
             progress.setLabelText("Filting:...")
@@ -97,17 +98,21 @@ class DataFilterBatchWidget(QDialog, Ui_dataFilterBatch):
             progress.setModal(True)
             for i in xrange(fileNums):
                 progress.setValue(i)
-                rawFile = unicode(self._rawFiles[i])    # np.loadtxt载入的文件名需要python字符串类型
-                filterFile = unicode(self._filterFiles[i])
+                rawFile = unicode(self.txtRawFiles.item(i).text())            # np.loadtxt载入的文件名需要python字符串类型
+                filterFile = unicode(self.txtFilterFiles.item(i).text())
+
                 progress.setLabelText(QString("Filting: \n\t%1").arg(rawFile))
                 qApp.processEvents()
                 if progress.wasCanceled():
                     return
-                dataFilter = DataFilter(samplingRate=sampleRate,
-                                        filterOrder=filterOrder,
-                                        cutoffFre=cutoffFre)
-                dataFilter.setFileFormat(rawFile, filterFile, headerNums)
-                dataFilter.toDataFile()
+                dataFilterObj = DataFilter(samplingRate=sampleRate,
+                                           filterOrder=filterOrder,
+                                           cutoffFre=cutoffFre)
+                dataFilterObj.setRawFile(rawFile)
+                dataFilterObj.setFiltFile(filterFile)
+                dataFilterObj.setHeaderRows(headerNums)
+
+                dataFilterObj.toDataFile()
 
             QMessageBox.about(self, u"{0} -- {1}".format(qApp.applicationName(), __appname__),
                               u"滤波完成")

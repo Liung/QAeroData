@@ -1,18 +1,17 @@
 #coding: UTF-8
 
-import sys
-sys.path.append("./widget")
-import codecs
-import string
 import platform
+import sys
+
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-from dataDynRigTrans import dataDynRigTransMain
-from dataTrans import dataTransMain
+
+# from dataDynRigTrans import dataDynRigTransMain
+from dataTrans import DataTransWidget
 from tools.wingView import WingViewWin
 from tools import miniCalculation, QPicConvertor, img2gifWidget, Tetris
 from dataFilter import dataFilterMain, dataFilterBatchMain
-from widget import matplotlibWidget
+from widget import MatplotlibWidget, DirectoryViewer, SpreadSheet
 
 import qrc_resources
 
@@ -21,177 +20,8 @@ __author__ = 'liuchao'
 __appname__ = 'QAeroData'
 
 
-class DirectoryViewer(QDialog):
-    def __init__(self, parent=None):
-        super(DirectoryViewer, self).__init__(parent)
-
-        # self.model = QDirModel()
-        self.model = QFileSystemModel()
-        self.model.setRootPath(QDir.homePath())
-        self.model.setReadOnly(True)
-        # self.model.setSorting(QDir.DirsFirst | QDir.IgnoreCase | QDir.Name)
-
-        self.treeView = QTreeView(self)
-        self.treeView.setModel(self.model)
-        self.treeView.header().setStretchLastSection(True)
-        self.treeView.header().setSortIndicator(0, Qt.AscendingOrder)
-        self.treeView.header().setClickable(True)
-
-        index = self.model.index(QDir.currentPath())
-        self.treeView.expand(index)
-        self.treeView.scrollTo(index)
-        self.treeView.resizeColumnToContents(0)
-
-        createDirBtn = QPushButton(u'创建新目录')
-        removeBtn = QPushButton(u'删除文件或目录')
-
-        createDirBtn.clicked.connect(self.createDirectory)
-        removeBtn.clicked.connect(self.remove)
-
-        bottomLay = QHBoxLayout()
-        bottomLay.addWidget(createDirBtn)
-        bottomLay.addWidget(removeBtn)
-        bottomLay.addStretch()
-
-        mainLay = QVBoxLayout()
-        mainLay.addWidget(self.treeView)
-        mainLay.addLayout(bottomLay)
-
-        self.setLayout(mainLay)
-
-    def createDirectory(self):
-        index = self.treeView.currentIndex()
-        if not index.isValid():
-            return
-
-        dirName, _ = QInputDialog.getText(self, u"Create a Directory",
-                                          u"Directory name:")
-        if not dirName.isEmpty():
-            if not self.model.mkdir(index, dirName).isValid():
-                QMessageBox.information(self, u"Create Directory",
-                                        u"Failed to create a directory")
-
-    def remove(self):
-        index = self.treeView.currentIndex()
-        if not index.isValid():
-            return
-
-        if self.model.fileInfo(index).isDir():
-            ok = self.model.rmdir(index)
-        else:
-            ok = self.model.remove(index)
-
-        if not ok:
-            QMessageBox.information(self, u'Remove',
-                                    u"Failed to0 remove {0}".format(self.model.fileName(index)))
-
-
-class SpreadSheet(QTableWidget):
-
-    NextId = 1
-
-    def __init__(self, filename=QString(), parent=None):
-        super(SpreadSheet, self).__init__(parent)
-        self.setAttribute(Qt.WA_DeleteOnClose)
-        self.setAlternatingRowColors(True)
-        self.setRowCount(100)
-        self.setColumnCount(len(string.uppercase))
-        self.setHorizontalHeaderLabels(string.uppercase)
-        self.modified = False
-        self.isNewFile = False
-        self.filename = QString(filename)
-        if self.filename.isEmpty():
-            self.filename = QString("Unnamed-{0}.txt".format(SpreadSheet.NextId))
-            SpreadSheet.NextId += 1
-            self.modified = False
-            self.isNewFile = True
-
-        self.setWindowTitle(QFileInfo(self.filename).fileName())
-
-        self.itemChanged.connect(self.setModified)
-
-    def closeEvent(self, event):
-        if self.modified and QMessageBox.question(self,
-                                                  u"{0} -- Unsaved Changes".format(__appname__),
-                                                  u"文件{0}内容已经发生变化，是否要保存已做的修改？".format(self.filename),
-                                                  QMessageBox.Yes | QMessageBox.No) == QMessageBox.Yes:
-            try:
-                self.save()
-            except (IOError, OSError), err:
-                QMessageBox.warning(self, u"{0} -- Save Error".format(__appname__),
-                                    u"Failed to save {0}:{1}".format(unicode(self.filename), err))
-
-    def isModified(self):
-        return self.modified
-
-    def setModified(self):
-
-        self.modified = True
-
-    def save(self):
-        with open(unicode(self.filename), mode='w') as f:
-            rows, columns = self.rowCount(), self.columnCount()
-            headers = [unicode(self.horizontalHeaderItem(i).text())
-                       for i in range(columns)]
-            try:
-                headersLine = '\t'.join(headers).encode('utf-8')
-            except:
-                headersLine = '\t'.join(headers).encode('gbk2312')
-            f.write(headersLine + '\n')
-            for row in xrange(rows):
-                dataLine = []
-                for column in xrange(columns):
-                    item = self.item(row, column)
-                    if item is not None:
-                        dataLine.append(unicode(item.text()))
-                    else:
-                        dataLine.append('unKnown')
-                dataStr = '\t'.join(dataLine)
-                f.write(dataStr + '\n')
-
-    def load(self):
-        try:
-            with codecs.open(unicode(self.filename), encoding="utf-8") as f:
-                headers = f.readline().split()
-                data = []
-                line = f.readline()
-                while line:
-                    data.append(line.split())
-                    line = f.readline()
-                self.loadHeaderAndData(headers, data)
-                self.modified = False
-        except UnicodeDecodeError:
-            try:
-                with codecs.open(unicode(self.filename), encoding="cp936") as f:
-                    headers = f.readline().split()
-                    data = []
-                    line = f.readline()
-                    while line:
-                        data.append(line.split())
-                        line = f.readline()
-                    self.loadHeaderAndData(headers, data)
-                    self.modified = False
-            except:
-                raise IOError
-        except:
-            return OSError
-
-    def loadHeaderAndData(self, headers, data):
-        rows, columns = len(data), len(headers)
-        self.setRowCount(rows)
-        self.setColumnCount(columns)
-        self.setHorizontalHeaderLabels(headers)
-        for row in xrange(rows):
-            for column in xrange(columns):
-                try:
-                    text = data[row][column]
-                except:
-                    text = ""
-                item = QTableWidgetItem(text)
-                self.setItem(row, column, item)
-
-
 class MainWindow(QMainWindow):
+
     def __init__(self):
         super(MainWindow, self).__init__()
 
@@ -200,12 +30,39 @@ class MainWindow(QMainWindow):
         self.initActions()
         self.loadSettings()
         self.updateWindowMenu()
+        self.updateEditMenu()
         self.setWindowTitle(__appname__)
         self.setIconSize(QSize(32, 32))
         QTimer.singleShot(0, self.loadFiles)
 
+        # 设置主应用程序可拖拽
+        self.setAcceptDrops(True)
+
         self.xAxisData = []
         self.yAxisData = []
+        #
+        # # initUI's elements
+        # self.mdi = None
+        # self.treeView = None
+        # self.treeModel = None
+        # self.dockWidgetFileManager = None
+        # self.plotWidget = None
+        # self.docWidgetPlot = None
+        #
+        # # initActions' elements
+        # self.actionFileManager = None
+        # self.actionWindowNext = None
+        # self.actionWindowPrev = None
+        # self.actionWindowCascade = None
+        # self.actionWindowTile = None
+        # self.actionWindowMinimize = None
+        # self.actionWindowRestore = None
+        # self.actionWindowClose = None
+        # self.actionWindowCloseAll = None
+        # self.actionWindowSubView = None
+        # self.actionWindowTabbedView = None
+        # self.windowMapper = None
+        # self.menuWindow = None
 
     def initUI(self):
 
@@ -215,36 +72,26 @@ class MainWindow(QMainWindow):
         self.mdi.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.setCentralWidget(self.mdi)
 
-        # self.treeView = QTreeView()
-        # self.treeModel = QFileSystemModel()
-        # self.treeModel.setRootPath('C:/')
-        # self.treeView.setModel(self.treeModel)
-        # index = self.treeModel.index(QDir.currentPath())
-        # self.treeView.expand(index)
-        # self.treeView.scrollTo(index)
-        # self.treeView.resizeColumnToContents(0)
         self.treeView = DirectoryViewer()
         self.treeModel = self.treeView.model
-        self.dockwidgetFileManager = QDockWidget()
-        self.dockwidgetFileManager.setWindowTitle(u"文件管理器")
-        self.dockwidgetFileManager.setObjectName(u"文件管理器")
-        self.dockwidgetFileManager.setWidget(self.treeView)
+        self.dockWidgetFileManager = QDockWidget()
+        self.dockWidgetFileManager.setWindowTitle(u"文件管理器")
+        self.dockWidgetFileManager.setObjectName(u"文件管理器")
+        self.dockWidgetFileManager.setWidget(self.treeView)
         self.treeView.treeView.doubleClicked[QModelIndex].connect(self.treeViewDoubleClicked)
 
-        self.plotWidget = matplotlibWidget.MatplotlibWidget(self)
+        self.plotWidget = MatplotlibWidget()
         self.docWidgetPlot = QDockWidget()
         self.docWidgetPlot.setWindowTitle(u"Plot")
         self.docWidgetPlot.setObjectName(u"MatplotlibPlot")
         self.docWidgetPlot.setWidget(self.plotWidget)
 
         self.addDockWidget(Qt.RightDockWidgetArea, self.docWidgetPlot)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.dockwidgetFileManager)
-        status = self.statusBar()
-        status.showMessage(u"Copyright: 南京航空航天大学 航空宇航学院 史志伟课题组",
-                           5000)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.dockWidgetFileManager)
+        self.statusBar().showMessage(u"Copyright: 南京航空航天大学 航空宇航学院 史志伟课题组", 5000)
 
     def initActions(self):
-        # File
+        # File menu and toolbar
         actionFileNew = self.createAction(u"新建(&New)", self.fileNew,
                                           QKeySequence.New, "document-new", u"新建文件")
         actionFileOpen = self.createAction(u"打开(&Open)", self.fileOpen,
@@ -271,41 +118,40 @@ class MainWindow(QMainWindow):
 
         self.mdi.addActions((actionFileNew, actionFileOpen))
 
-        #Edit
-        actionEditCopy = self.createAction(u"复制(&Copy)", self.editCopy,
-                                           QKeySequence.Copy, "edit-copy", u"复制文本到粘贴板")
-        actionEditCut = self.createAction(u"剪切(&Cut)", self.editCut,
-                                          QKeySequence.Cut, "edit-cut", u"剪切文本到粘贴板")
-        actionEditPaste = self.createAction(u"粘贴(&Paste)", self.editPaste,
-                                            QKeySequence.Paste, "edit-paste", u"从粘贴板中粘贴文本")
-
+        #Edit menu and toolbar
+        self.actionEditCopy = self.createAction(u"复制(&Copy)", icon="edit-copy")
+        self.actionEditCut = self.createAction(u"剪切(&Cut)", icon="edit-cut")
+        self.actionEditPaste = self.createAction(u"粘贴(&Paste)", icon="edit-paste")
+        self.actionEditCopy.setEnabled(False)
+        self.actionEditCut.setEnabled(False)
+        self.actionEditPaste.setEnabled(False)
         menuEdit = self.menuBar().addMenu(u"编辑(&E)")
-        self.addActions(menuEdit, (actionEditCopy, actionEditCut,
-                                   actionEditPaste))
+        self.addActions(menuEdit, (self.actionEditCopy, self.actionEditCut,
+                                   self.actionEditPaste))
 
         toolbarEdit = self.addToolBar(u"编辑")
         toolbarEdit.setObjectName(u"编辑")
-        self.addActions(toolbarEdit, (actionEditCopy, actionEditCut,
-                                      actionEditPaste))
+        self.addActions(toolbarEdit, (self.actionEditCopy, self.actionEditCut,
+                                      self.actionEditPaste))
 
-        self.mdi.addActions((actionEditCopy, actionEditCut, actionEditPaste))
+        self.mdi.addActions((self.actionEditCopy, self.actionEditCut, self.actionEditPaste))
 
-        #view
+        #view menu and toolbar
         actionToolbarFile = toolbarFile.toggleViewAction()
         actionToolbarEdit = toolbarEdit.toggleViewAction()
-        self.actionFileManager = self.dockwidgetFileManager.toggleViewAction()
+        self.actionFileManager = self.dockWidgetFileManager.toggleViewAction()
         self.actionFileManager.setText(u"文件管理器")
         menuView = self.menuBar().addMenu(u"&View")
         # the view's "self.addActions()" Function is the end of this scope..0-0..
 
-        #Balance
+        #Balance menu and toolbar
         menuBalanceSys = self.menuBar().addMenu(u"天平数据(&B)")
         actionBalanceTrans = self.createAction(u"天平数据转换",
                                                self.balanceTrans)
 
         self.addActions(menuBalanceSys, (actionBalanceTrans, ))
 
-        #dynamic rig
+        #dynamic rig menu and toolbar
         actionDynRigParamsSetting = self.createAction(u"动平台参数设置",
                                                       self.dynrigParamsSetting)
         actionFileFilterSingle = self.createAction(u"单文件滤波",
@@ -322,7 +168,7 @@ class MainWindow(QMainWindow):
                                          actionFileFilterBatch))
         self.addActions(menuDynRig, (actionDynRigDataManu, ))
 
-        #tools
+        #tools menu and toolbar
         actionToolsMiniCalculator = self.createAction(u"迷你计算器",
                                                       self.toolsMiniCalculator,
                                                       icon="calculator00", tip=u"功能强大的迷你计算器")
@@ -348,7 +194,7 @@ class MainWindow(QMainWindow):
         self.addActions(toolbarTools, (actionToolsMiniCalculator,
                                        actionToolsWingManager))
 
-        #Window
+        #Window menu and toolbar
         self.actionWindowNext = self.createAction(u"下一个窗口(&Next)",
                                                   self.mdi.activateNextSubWindow, QKeySequence.NextChild)
         self.actionWindowPrev = self.createAction(u"上一个窗口(&Previous)",
@@ -377,13 +223,15 @@ class MainWindow(QMainWindow):
         self.menuWindow = self.menuBar().addMenu(u"窗口(&W)")
         self.menuWindow.aboutToShow.connect(self.updateWindowMenu)
 
-        #about
-        actionAbout = self.createAction(u"关于", self.showAbout)
-
+        #about menu and toolbar
+        actionAbout = self.createAction(u"About {0}".format(__appname__), self.showAbout)
+        # actionAboutQt = self.createAction(u"About Qt", qApp.aboutQt())
         menuAbout = self.menuBar().addMenu(u"关于(&A)")
-        self.addActions(menuAbout, (actionAbout,))
+        self.addActions(menuAbout, (actionAbout,
+                                    # actionAboutQt,
+                                    ))
 
-        #view
+        #view menu and toolbar
         actionToolbarTools = toolbarTools.toggleViewAction()
         actionMatplotlibWidget = self.docWidgetPlot.toggleViewAction()
         self.addActions(menuView, (actionToolbarFile, actionToolbarEdit,
@@ -425,6 +273,37 @@ class MainWindow(QMainWindow):
             else:
                 target.addAction(action)
 
+    def dragEnterEvent(self, event):
+        if (event.mimeData().hasFormat("text/uri-list")):
+
+            # 主程序默认不接受拖入请求，设置接受
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        urls = event.mimeData().urls()  # the type of urls is PyQt4.QtCore.Urls
+        if not urls:
+            return
+        for fileName_urls in urls:
+            fileName = fileName_urls.toLocalFile()    # fileName's type is QString
+            if (fileName.isEmpty()):
+                return
+
+            # 加载文件
+            self.loadFile(fileName)
+
+    def mousePressEvent(self, event):
+        if (event.button() == Qt.LeftButton):
+            self._startMousePressPos = event.pos()
+
+    # def mouseMoveEvent(self, event):
+    #     if (event.buttons() & Qt.LeftButton):
+    #         distance = (event.pos() - self._startMousePressPos).manhattanLength()
+    #         if (distance >= QApplication.startDragDistance()):
+    #             drag = QDrag(self)
+    #             drag.setMimeData(event.mimeData)
+    #             drag.setPixmap(QPixmap(":icons/imgs/document-file.png"))
+    #             drag.exec_(Qt.MoveAction)
+
     def closeEvent(self, event):
         failures = []
         for subWindow in self.mdi.subWindowList():
@@ -454,7 +333,7 @@ class MainWindow(QMainWindow):
         for subWindow in self.mdi.subWindowList():
             spreadSheet = subWindow.widget()
             files.append(spreadSheet.filename)
-        settings.setValue("CurrentFiles",QVariant(files))
+        settings.setValue("CurrentFiles", QVariant(files))
 
     def loadFiles(self):
         if len(sys.argv) > 1:
@@ -475,6 +354,7 @@ class MainWindow(QMainWindow):
         spreadSheet = SpreadSheet()
         self.mdi.addSubWindow(spreadSheet)
         spreadSheet.show()
+        self.updateEditMenu()
 
     def fileOpen(self):
         filename = QFileDialog.getOpenFileName(self,
@@ -504,6 +384,7 @@ class MainWindow(QMainWindow):
         else:
             self.mdi.addSubWindow(spreadSheet)
             spreadSheet.show()
+            self.updateEditMenu()
 
     def fileSave(self):
         subWindow = self.mdi.activeSubWindow()
@@ -644,7 +525,7 @@ class MainWindow(QMainWindow):
                 self.loadFile(filename)
 
     def balanceTrans(self):
-        bt = dataTransMain.DataTransWidget(self)
+        bt = DataTransWidget(self)
         bt.show()
 
     def dynrigParamsSetting(self):
@@ -659,8 +540,9 @@ class MainWindow(QMainWindow):
         ffb.show()
 
     def dynrigDataManu(self):
-        dt = dataDynRigTransMain.dataTransWidget(self)
-        dt.show()
+        # dt = dataDynRigTransMain.dataTransWidget(self)
+        # dt.show()
+        pass
 
     def toolsMiniCalculator(self):
         miniCal = miniCalculation.MiniCalculation(self)
@@ -806,6 +688,18 @@ class MainWindow(QMainWindow):
             action.triggered.connect(self.windowMapper.map)
             self.windowMapper.setMapping(action, subWindow)
             i += 1
+            
+    def updateEditMenu(self):
+        subWindows = self.mdi.subWindowList()
+        if not subWindows:
+            return
+        subWindow = self.mdi.currentSubWindow().widget()
+        self.actionEditCopy = subWindow.actionEditCopy
+        self.actionEditCut = subWindow.actionEditCut
+        self.actionEditPaste = subWindow.actionEditPaste
+        self.actionEditCopy.setEnabled(True)
+        self.actionEditCut.setEnabled(True)
+        self.actionEditPaste.setEnabled(True)
 
     def showAbout(self):
         QMessageBox.about(self, u"About {0}".format(__appname__),
@@ -822,12 +716,36 @@ class MainWindow(QMainWindow):
                              QT_VERSION_STR, PYQT_VERSION_STR, platform.system(),
                              __author__))
 
-if __name__ == "__main__":
+
+def main():
+
+    import time
+
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(":icons/imgs/aircraft01.png"))
     app.setOrganizationName("NUAA")
     app.setOrganizationDomain("nuaa.edu.cn")
     app.setApplicationName(__appname__)
+
+    splash = QSplashScreen()
+    splash.setPixmap(QPixmap(":icons/imgs/qdata.png"))
+    splash.show()
+
+    splash.showMessage(u"正在启动主程序...",
+                       Qt.AlignRight | Qt.AlignBottom, Qt.black)
     form = MainWindow()
+    time.sleep(0.5)
+    splash.showMessage(u"Copy: 史志伟课题组所有 南京航空航天大学 流体力学系",
+                       Qt.AlignRight | Qt.AlignBottom, Qt.black)
+    time.sleep(0.5)
+    splash.showMessage(u"Developer: Liuchao Email: Lc.pypi@gmail.com",
+                       Qt.AlignRight | Qt.AlignBottom, Qt.black)
+    time.sleep(0.5)
     form.show()
+    splash.finish(form)
+    del splash
+
     sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    main()

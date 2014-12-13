@@ -3,23 +3,31 @@ from __future__ import division
 import numpy as np
 from scipy.signal import butter, filtfilt
 import sys
-sys.path.append("../widget")
+sys.path.append("D:/Users/LC/GitHub/QAeroData/")
 from widget.matplotlibWidget import MatplotlibWidget
 
 __author__ = 'Vincent'
 
 
 class DataFilter(object):
-    """定义一个滤波器，用来对实验数据进行滤波处理"""
+    """
+    定义一个滤波器，用来对实验数据进行滤波处理
+        system sampling rate        系统采样率
+        cut-off fre                 低通滤波器截止频率
+        filter order                滤波阶数
+    """
     def __init__(self, samplingRate=1000., filterOrder=5, cutoffFre=4.):
         self._samplingRate = samplingRate
         self._filterOrder = filterOrder
         self._cutoffFre = cutoffFre
 
         self._fileFre = None
-        self._rawFileName = None
-        self._filtFileName = None
-        self._headerNums = None
+        self._rawFile = None
+        self._filtFile = None
+        self._headerRows = None
+
+        self._forceStartCol = 6
+        self._forceEndCol = 11
 
     def setFileFre(self, fre):
         self._fileFre = fre
@@ -27,10 +35,20 @@ class DataFilter(object):
     def setCutoffFreRatio(self, ratio):
         self._cutoffFre = self._fileFre * ratio
 
-    def setFileFormat(self, rawFileName, filterFileName, headerNums=1):
-        self._rawFileName = rawFileName
-        self._filtFileName = filterFileName
-        self._headerNums = headerNums
+    def setRawFile(self, rawFile):
+        self._rawFile = rawFile
+
+    def setFiltFile(self, filtFile):
+        self._filtFile = filtFile
+
+    def setHeaderRows(self, headerRows=1):
+        self._headerRows = headerRows
+
+    def setForceStartCol(self, forceStartCol):
+        self._forceStartCol = forceStartCol
+
+    def setForceEndCol(self, forceEndCol):
+        self._forceEndCol = forceEndCol
 
     def filt(self):
         """butter 指令來設計一個 Butterworth 低通濾波器，其格式如下：
@@ -103,46 +121,50 @@ class DataFilter(object):
             Returns :
                 y : ndarray
                     The filtered output, an array of type numpy.float64 with the same shape as x."""
-        fileName = self._rawFileName
-        headerNums = self._headerNums
+        fileName = self._rawFile
+        headerNums = self._headerRows
         rawData = np.loadtxt(fileName, skiprows=headerNums)
-        b, a = butter(self._filterOrder, self._cutoffFre/(self._samplingRate/2.),
-                      btype='low')
+        b, a = butter(self._filterOrder, self._cutoffFre/(self._samplingRate/2.), btype='low')
         filterData = np.zeros_like(rawData)
+
         for i in xrange(rawData.shape[1]):
-            if i < 4:    # 只对力和力矩进行滤波处理，角度列不进行滤波
-                filterData[:, i] = rawData[:, i]
+            if self._forceStartCol - 1 <= i < self._forceEndCol:    # 只对力和力矩进行滤波处理，角度列不进行滤波
+                filterData[:, i] = filtfilt(b, a, rawData[:, i])
             else:
-                data = filtfilt(b, a, rawData[:, i])
-                filterData[:, i] = data
+                filterData[:, i] = rawData[:, i]
 
         return filterData
 
     def toDataFile(self):
 
-        rawFileName = self._rawFileName
-        filterFileName = self._filtFileName
-        headerNums = self._headerNums
+        rawFileName = self._rawFile
+        filterFileName = self._filtFile
+        headerNums = self._headerRows
 
         filterData = self.filt()
+        # read the raw file's headers
         headerLines = []
         with open(rawFileName, 'r') as f1:
             for i in range(headerNums):
                 headerLines.append(f1.readline())
 
-        with open(filterFileName, 'w') as f2:
-            f2.writelines(headerLines)
-            m, n = filterData.shape
-            for i in xrange(m):
-                for j in xrange(n):
-                    f2.write("%-10.8f\t" % filterData[i, j])
-                f2.write("\n")
+        # write filt data to filter file
+        np.savetxt(filterFileName, filterData,
+                   fmt="%-10.8f", header='\n'.join(headerLines),
+                   comments='')
+
+        # with open(filterFileName, 'w') as f2:
+        #     f2.writelines(headerLines)
+        #     m, n = filterData.shape
+        #     for i in xrange(m):
+        #         for j in xrange(n):
+        #             f2.write("%-10.8f\t" % filterData[i, j])
+        #         f2.write("\n")
         return True
 
     def showWidget(self, parent):
-        rawFn = self._rawFileName
-        hr = self._headerNums
-        rawData = np.loadtxt(rawFn, skiprows=hr)
+
+        rawData = np.loadtxt(self._rawFile, skiprows=self._headerRows)
         filterData = self.filt()
 
         mpl1 = MatplotlibWidget(parent)

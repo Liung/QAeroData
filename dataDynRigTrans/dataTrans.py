@@ -40,7 +40,7 @@ class Model(object):
 
     def setTestConditions(self,totalPressure=0.):
         '''设置实验条件'''
-        #self.WindSpeed = windSpeed
+        #self.V = windSpeed
         self.TotalPressure = totalPressure
 
     def setBalanceSty(self,index):

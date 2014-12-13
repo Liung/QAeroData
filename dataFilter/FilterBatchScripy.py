@@ -103,7 +103,7 @@ for f in fp:
 	filtfilename = f.replace('.txt','F.txt')
 	filtfile = os.path.join(tarpath,filtfilename)
 	filtobj = DataFilter(samplingRate=1000,filterOrder=5)
-	filtobj.setFileFormat(rawFileName=rawfile,filtFileName=filtfile,headerNums=1)
+	filtobj.setFileFormat(rawFile=rawfile,filtFileName=filtfile, headerRows=1)
 	filtobj.setFileFre(fz)
 	filtobj.setCutoffFreRatio(ratio)
 	cutFre = filtobj._cutoffFre
