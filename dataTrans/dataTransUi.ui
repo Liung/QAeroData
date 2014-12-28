@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>675</width>
-    <height>640</height>
+    <width>591</width>
+    <height>646</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,77 +18,6 @@
     <normaloff>:/imgs/airplane.png</normaloff>:/imgs/airplane.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <spacer name="horizontalSpacer_6">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_5">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-         <kerning>true</kerning>
-        </font>
-       </property>
-       <property name="text">
-        <string>实验数据转换</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_17">
      <item>
@@ -134,7 +63,11 @@
         <font>
          <pointsize>12</pointsize>
          <weight>75</weight>
+         <italic>false</italic>
          <bold>true</bold>
+         <underline>false</underline>
+         <strikeout>false</strikeout>
+         <kerning>true</kerning>
         </font>
        </property>
        <property name="text">
@@ -384,42 +317,12 @@
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <layout class="QGridLayout" name="gridLayout_2">
-            <item row="0" column="1" colspan="3">
-             <widget class="QLabel" name="label_16">
-              <property name="text">
-               <string>请选择原始数据文件目录：</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="2">
-             <widget class="QLineEdit" name="txtAeroFile"/>
-            </item>
-            <item row="6" column="3">
-             <widget class="QPushButton" name="pbtnAeroFile">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="3">
-             <widget class="QPushButton" name="pbtnDynamicFile">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="2">
-             <widget class="QLineEdit" name="txtStaticFile"/>
-            </item>
-            <item row="7" column="1" colspan="3">
-             <widget class="Line" name="line_3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+             <widget class="QLineEdit" name="txtStaticFile">
+              <property name="placeholderText">
+               <string>请选择静态文件</string>
               </property>
              </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QLineEdit" name="txtDynamicFile"/>
             </item>
             <item row="5" column="1">
              <widget class="QLabel" name="label_13">
@@ -441,13 +344,6 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="3">
-             <widget class="QPushButton" name="pbtnStaticFile">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="1">
              <widget class="QLabel" name="label_12">
               <property name="text">
@@ -458,9 +354,6 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="2">
-             <widget class="QLineEdit" name="txtBodyFile"/>
-            </item>
             <item row="2" column="1">
              <widget class="QLabel" name="label_14">
               <property name="text">
@@ -468,6 +361,20 @@
               </property>
               <property name="buddy">
                <cstring>txtDynamicFile</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="3">
+             <widget class="QLabel" name="label_16">
+              <property name="text">
+               <string>吹风数据文件目录：</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="2">
+             <widget class="QLineEdit" name="txtBodyFile">
+              <property name="placeholderText">
+               <string>请选择体轴文件</string>
               </property>
              </widget>
             </item>
@@ -485,10 +392,51 @@
               </property>
              </widget>
             </item>
+            <item row="2" column="3">
+             <widget class="QPushButton" name="pbtnDynamicFile">
+              <property name="cursor">
+               <cursorShape>ArrowCursor</cursorShape>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="2">
+             <widget class="QLineEdit" name="txtAeroFile">
+              <property name="placeholderText">
+               <string>请选择风轴文件</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QPushButton" name="pbtnStaticFile">
+              <property name="cursor">
+               <cursorShape>ArrowCursor</cursorShape>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLineEdit" name="txtDynamicFile">
+              <property name="placeholderText">
+               <string>请选择动态文件</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="3">
+             <widget class="QPushButton" name="pbtnAeroFile">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
             <item row="4" column="1" colspan="3">
              <widget class="QLabel" name="label_17">
               <property name="text">
-               <string>选择生成数据文件目录：</string>
+               <string>生成数据文件目录：</string>
               </property>
              </widget>
             </item>
@@ -548,18 +496,49 @@
           </widget>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <widget class="QLabel" name="label_19">
+           <property name="text">
+            <string>动/静文件校验符</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
            <item>
-            <widget class="QLabel" name="label_19">
+            <widget class="QLabel" name="label_18">
              <property name="text">
-              <string>动/静文件校验符(用西文分号;隔开)</string>
+              <string>静态文件</string>
+             </property>
+             <property name="buddy">
+              <cstring>txtBatchStaFileReg</cstring>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtBatchStaFileReg">
+             <property name="text">
+              <string>J.txt</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_16">
+           <item>
+            <widget class="QLabel" name="label_28">
+             <property name="text">
+              <string>动态文件</string>
+             </property>
+             <property name="buddy">
+              <cstring>txtBatchDynFileReg</cstring>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLineEdit" name="txtBatchDynFileReg">
              <property name="text">
-              <string>d.txt;j.txt</string>
+              <string>D.txt</string>
              </property>
             </widget>
            </item>
@@ -649,19 +628,6 @@
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QGroupBox" name="groupBox_3">
@@ -672,161 +638,95 @@
         </size>
        </property>
        <property name="title">
-        <string>Header行数</string>
+        <string>文件信息</string>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
-         <widget class="QSpinBox" name="spbFileHeaderNums">
-          <property name="maximum">
-           <number>50</number>
-          </property>
-          <property name="value">
-           <number>1</number>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Headers</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="buddy">
+             <cstring>spbFileHeaderNums</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spbFileHeaderNums">
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_4">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>Footer行数</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
-         <widget class="QSpinBox" name="spbFileFooterNums">
-          <property name="maximum">
-           <number>50</number>
-          </property>
-          <property name="value">
-           <number>0</number>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QLabel" name="label_25">
+            <property name="text">
+             <string>Footers</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="buddy">
+             <cstring>spbFileFooterNums</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spbFileFooterNums">
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_5">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>角度起始列</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="QSpinBox" name="spbAngleStartCol">
-          <property name="maximum">
-           <number>50</number>
-          </property>
-          <property name="value">
-           <number>1</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_6">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>角度终止列</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <widget class="QSpinBox" name="spbAngleEndCol">
-          <property name="maximum">
-           <number>50</number>
-          </property>
-          <property name="value">
-           <number>3</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_7">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>力和力矩起始列</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <item>
-         <widget class="QSpinBox" name="spbForceStartCol">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximum">
-           <number>50</number>
-          </property>
-          <property name="singleStep">
-           <number>1</number>
-          </property>
-          <property name="value">
-           <number>4</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_8">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>力和力矩终止列</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
-        <item>
-         <widget class="QSpinBox" name="spbForceEndCol">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximum">
-           <number>50</number>
-          </property>
-          <property name="value">
-           <number>9</number>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_14">
+          <item>
+           <widget class="QCheckBox" name="chbTime">
+            <property name="layoutDirection">
+             <enum>Qt::RightToLeft</enum>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>时间列</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -840,45 +740,521 @@
         </size>
        </property>
        <property name="title">
-        <string>角度类型</string>
+        <string>角度类型与对应列</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
-         <widget class="QRadioButton" name="rbAngleEuler">
-          <property name="text">
-           <string>欧拉角</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QRadioButton" name="rbAngleEuler">
+            <property name="text">
+             <string>欧拉角</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chbTheta">
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>120</red>
+                  <green>120</green>
+                  <blue>120</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>θ</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spbThetaCol">
+            <property name="toolTip">
+             <string>俯仰角/支撑角</string>
+            </property>
+            <property name="statusTip">
+             <string>俯仰角/支撑角</string>
+            </property>
+            <property name="whatsThis">
+             <string>俯仰角/支撑角</string>
+            </property>
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>2</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chbPsi">
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>120</red>
+                  <green>120</green>
+                  <blue>120</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>ψ</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spbPsiCol">
+            <property name="toolTip">
+             <string>偏航角</string>
+            </property>
+            <property name="statusTip">
+             <string>偏航角</string>
+            </property>
+            <property name="whatsThis">
+             <string>偏航角</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>3</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chbPhi">
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>120</red>
+                  <green>120</green>
+                  <blue>120</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>φ</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spbPhiCol">
+            <property name="toolTip">
+             <string>滚转角</string>
+            </property>
+            <property name="statusTip">
+             <string>滚转角</string>
+            </property>
+            <property name="whatsThis">
+             <string>滚转角</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>4</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QRadioButton" name="rbAngleAero">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>气动角</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QRadioButton" name="rbAngleAero">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>气动角</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chbAlpha">
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>120</red>
+                  <green>120</green>
+                  <blue>120</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>α</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spbAlphaCol">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>迎角</string>
+            </property>
+            <property name="statusTip">
+             <string>迎角</string>
+            </property>
+            <property name="whatsThis">
+             <string>迎角</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chbBeta">
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>85</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>120</red>
+                  <green>120</green>
+                  <blue>120</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>β</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spbBetaCol">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>侧滑角</string>
+            </property>
+            <property name="statusTip">
+             <string>侧滑角</string>
+            </property>
+            <property name="whatsThis">
+             <string>侧滑角</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>2</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_14">
      <item>
-      <widget class="QLabel" name="label_18">
-       <property name="text">
-        <string>角度偏移量</string>
+      <widget class="QGroupBox" name="groupBox_5">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
        </property>
+       <property name="title">
+        <string>力与力矩对应列</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_10">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QLabel" name="label_26">
+            <property name="toolTip">
+             <string>默认力与力矩总列数为6</string>
+            </property>
+            <property name="text">
+             <string>起始列</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="buddy">
+             <cstring>spbFMStartCol</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spbFMStartCol">
+            <property name="toolTip">
+             <string>默认力与力矩总列数为6</string>
+            </property>
+            <property name="value">
+             <number>6</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QLabel" name="label_27">
+            <property name="toolTip">
+             <string>力与力矩起始列</string>
+            </property>
+            <property name="text">
+             <string>终止列</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="buddy">
+             <cstring>spbFMEndCol</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spbFMEndCol">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>力与力矩终止列</string>
+            </property>
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>11</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="txtColumnOffset"/>
      </item>
     </layout>
    </item>
@@ -929,6 +1305,55 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cbBalanceSty</tabstop>
+  <tabstop>pbtnBalanceParamsSetting</tabstop>
+  <tabstop>txtModelArea</tabstop>
+  <tabstop>txtModelSpan</tabstop>
+  <tabstop>txtModelRootChord</tabstop>
+  <tabstop>txtModelRefChord</tabstop>
+  <tabstop>txtWindSpeed</tabstop>
+  <tabstop>txtDeltaX</tabstop>
+  <tabstop>txtDeltaY</tabstop>
+  <tabstop>txtDeltaZ</tabstop>
+  <tabstop>pbtnModelDataInput</tabstop>
+  <tabstop>pbtnModelDataExport</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>txtStaticFile</tabstop>
+  <tabstop>pbtnStaticFile</tabstop>
+  <tabstop>txtDynamicFile</tabstop>
+  <tabstop>pbtnDynamicFile</tabstop>
+  <tabstop>txtBodyFile</tabstop>
+  <tabstop>pbtnBodyFile</tabstop>
+  <tabstop>txtAeroFile</tabstop>
+  <tabstop>pbtnAeroFile</tabstop>
+  <tabstop>spbFileHeaderNums</tabstop>
+  <tabstop>spbFileFooterNums</tabstop>
+  <tabstop>rbAngleEuler</tabstop>
+  <tabstop>spbThetaCol</tabstop>
+  <tabstop>spbPsiCol</tabstop>
+  <tabstop>spbPhiCol</tabstop>
+  <tabstop>rbAngleAero</tabstop>
+  <tabstop>spbAlphaCol</tabstop>
+  <tabstop>spbBetaCol</tabstop>
+  <tabstop>spbFMStartCol</tabstop>
+  <tabstop>spbFMEndCol</tabstop>
+  <tabstop>pbtnBalanceInfo</tabstop>
+  <tabstop>pbtnGenerateFile</tabstop>
+  <tabstop>pbtnHelp</tabstop>
+  <tabstop>pbtnExit</tabstop>
+  <tabstop>chbBatchStaticFile</tabstop>
+  <tabstop>pbtnBatchStaticFile</tabstop>
+  <tabstop>txtBatchStaticFile</tabstop>
+  <tabstop>txtBatchStaFileReg</tabstop>
+  <tabstop>txtBatchDynFileReg</tabstop>
+  <tabstop>pbtnBatchAddDir</tabstop>
+  <tabstop>listWidgetBatchDirs</tabstop>
+  <tabstop>pbtnBatchDelDir</tabstop>
+  <tabstop>pbtnBatchResultDir</tabstop>
+  <tabstop>txtBatchResultDir</tabstop>
+  <tabstop>listWidgetBatchFiles</tabstop>
+ </tabstops>
  <resources>
   <include location="imgs.qrc"/>
  </resources>
@@ -940,44 +1365,172 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>579</x>
-     <y>580</y>
+     <x>557</x>
+     <y>612</y>
     </hint>
     <hint type="destinationlabel">
-     <x>589</x>
-     <y>532</y>
+     <x>585</x>
+     <y>608</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>chbBatchStaticFile</sender>
+   <sender>chbTheta</sender>
    <signal>toggled(bool)</signal>
-   <receiver>pbtnBatchStaticFile</receiver>
+   <receiver>spbThetaCol</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>78</x>
-     <y>247</y>
+     <x>218</x>
+     <y>538</y>
     </hint>
     <hint type="destinationlabel">
-     <x>226</x>
-     <y>246</y>
+     <x>256</x>
+     <y>541</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>chbBatchStaticFile</sender>
+   <sender>chbPsi</sender>
    <signal>toggled(bool)</signal>
-   <receiver>txtBatchStaticFile</receiver>
+   <receiver>spbPsiCol</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>89</x>
-     <y>250</y>
+     <x>312</x>
+     <y>545</y>
     </hint>
     <hint type="destinationlabel">
-     <x>121</x>
-     <y>279</y>
+     <x>359</x>
+     <y>544</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chbPhi</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spbPhiCol</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>387</x>
+     <y>535</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>439</x>
+     <y>536</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chbAlpha</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spbAlphaCol</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>250</x>
+     <y>569</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chbBeta</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spbBetaCol</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>314</x>
+     <y>576</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>356</x>
+     <y>575</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbAngleEuler</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chbTheta</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>142</x>
+     <y>538</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>218</x>
+     <y>534</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbAngleEuler</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chbPsi</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>146</x>
+     <y>540</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>313</x>
+     <y>540</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbAngleEuler</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chbPhi</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>156</x>
+     <y>537</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>407</x>
+     <y>542</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbAngleAero</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chbAlpha</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>142</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>222</x>
+     <y>576</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbAngleAero</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chbBeta</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>150</x>
+     <y>571</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>310</x>
+     <y>577</y>
     </hint>
    </hints>
   </connection>

@@ -18,8 +18,6 @@ import codecs
 from dataDynRigTrans.dataDynRigTransUi import Ui_dataTransWidget
 #from dataTrans import Model,BalanceG18
 import numpy as np
-from balance.balance import sind, asind, atand, cosd
-
 
 class dataTransWidget(QDialog, Ui_dataTransWidget):
     def __init__(self, parent=None):

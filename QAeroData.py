@@ -146,20 +146,15 @@ class MainWindow(QMainWindow):
 
         #Balance menu and toolbar
         menuBalanceSys = self.menuBar().addMenu(u"天平数据(&B)")
-        actionBalanceTrans = self.createAction(u"天平数据转换",
-                                               self.balanceTrans)
+        actionBalanceTrans = self.createAction(u"天平数据转换", self.balanceTrans)
 
         self.addActions(menuBalanceSys, (actionBalanceTrans, ))
 
         #dynamic rig menu and toolbar
-        actionDynRigParamsSetting = self.createAction(u"动平台参数设置",
-                                                      self.dynrigParamsSetting)
-        actionFileFilterSingle = self.createAction(u"单文件滤波",
-                                                   self.fileFilterSingle)
-        actionFileFilterBatch = self.createAction(u"多文件滤波",
-                                                  self.fileFilterBatch)
-        actionDynRigDataManu = self.createAction(u"动平台数据处理",
-                                                 self.dynrigDataManu)
+        actionDynRigParamsSetting = self.createAction(u"动平台参数设置", self.dynrigParamsSetting)
+        actionFileFilterSingle = self.createAction(u"单文件滤波", self.fileFilterSingle)
+        actionFileFilterBatch = self.createAction(u"多文件滤波", self.fileFilterBatch)
+        actionDynRigDataManu = self.createAction(u"动平台数据处理", self.dynrigDataManu)
 
         menuDynRig = self.menuBar().addMenu(u"动态机构(&D)")
         self.addActions(menuDynRig, (actionDynRigParamsSetting, ))
@@ -169,20 +164,15 @@ class MainWindow(QMainWindow):
         self.addActions(menuDynRig, (actionDynRigDataManu, ))
 
         #tools menu and toolbar
-        actionToolsMiniCalculator = self.createAction(u"迷你计算器",
-                                                      self.toolsMiniCalculator,
+        actionToolsMiniCalculator = self.createAction(u"迷你计算器", self.toolsMiniCalculator,
                                                       icon="calculator00", tip=u"功能强大的迷你计算器")
-        actionToolsWingManager = self.createAction(u"翼型管理器",
-                                                   self.toolsWingManager,
+        actionToolsWingManager = self.createAction(u"翼型管理器", self.toolsWingManager,
                                                    icon="WingManager", tip=u"多种翼型库管理工具")
-        actionToolsPicConvertor = self.createAction(u"图像格式转换",
-                                                    self.toolsPicConvertor,
+        actionToolsPicConvertor = self.createAction(u"图像格式转换", self.toolsPicConvertor,
                                                     tip=u"支持多种图片文件的格式转换和大小转换")
-        actionToolsImg2Gif = self.createAction(u"Gif生成器",
-                                               self.toolsImg2Gif,
+        actionToolsImg2Gif = self.createAction(u"Gif生成器", self.toolsImg2Gif,
                                                tip=u"快速生成简单GIF动画文件")
-        actionToolsTetris = self.createAction(u"Tetris",
-                                              self.toolsTetris,
+        actionToolsTetris = self.createAction(u"Tetris", self.toolsTetris,
                                               tip=u"super Funny - 0.0")
 
         menuTools = self.menuBar().addMenu(u"工具(&T)")
@@ -246,8 +236,7 @@ class MainWindow(QMainWindow):
 
     def loadSettings(self):
         settings = QSettings()
-        self.restoreGeometry(
-            settings.value("MainWindow/Geometry").toByteArray())
+        self.restoreGeometry(settings.value("MainWindow/Geometry").toByteArray())
         self.restoreState(settings.value("MainWindow/State").toByteArray())
 
     def createAction(self, text, slot=None, shortcut=None, icon=None,
@@ -274,7 +263,7 @@ class MainWindow(QMainWindow):
                 target.addAction(action)
 
     def dragEnterEvent(self, event):
-        if (event.mimeData().hasFormat("text/uri-list")):
+        if event.mimeData().hasFormat("text/uri-list"):
 
             # 主程序默认不接受拖入请求，设置接受
             event.acceptProposedAction()
@@ -285,14 +274,14 @@ class MainWindow(QMainWindow):
             return
         for fileName_urls in urls:
             fileName = fileName_urls.toLocalFile()    # fileName's type is QString
-            if (fileName.isEmpty()):
+            if fileName.isEmpty():
                 return
 
             # 加载文件
             self.loadFile(fileName)
 
     def mousePressEvent(self, event):
-        if (event.button() == Qt.LeftButton):
+        if event.button() == Qt.LeftButton:
             self._startMousePressPos = event.pos()
 
     # def mouseMoveEvent(self, event):
@@ -342,13 +331,14 @@ class MainWindow(QMainWindow):
                 if QFileInfo(filename).isFile():
                     self.loadFile(filename)
                     QApplication.processEvents()
-        else:
-            settings = QSettings()
-            files = settings.value("CurrentFiles").toStringList()
-            for filename in files:
-                filename = QString(filename)
-                self.loadFile(filename)
-                QApplication.processEvents()
+        # 程序开始之后不加载以前文件
+        # else:
+        #     settings = QSettings()
+        #     files = settings.value("CurrentFiles").toStringList()
+        #     for filename in files:
+        #         filename = QString(filename)
+        #         self.loadFile(filename)
+        #         QApplication.processEvents()
 
     def fileNew(self):
         spreadSheet = SpreadSheet()
@@ -406,7 +396,7 @@ class MainWindow(QMainWindow):
     def fileSaveAs(self):
         subWindow = self.mdi.activeSubWindow()
         spreadSheet = subWindow.widget() if subWindow is not None else None
-        if spreadSheet is None or not isinstance(spreadSheet,QTableWidget):
+        if spreadSheet is None or not isinstance(spreadSheet, QTableWidget):
             return
         filename = QFileDialog.getSaveFileName(self,
                                                u"{0} -- Save File As".format(__appname__),
