@@ -1,6 +1,5 @@
 # -*-coding: utf-8 -*-
 __author__ = 'LC'
-__appname__ = 'GifMaker'
 
 import sys
 import img2gif
@@ -12,8 +11,12 @@ from PyQt4.QtCore import (QFileInfo, )
 
 
 class Img2GifWidget(QDialog):
+    AppName = u"GIF生成工具"
+    
     def __init__(self, parent=None):
         super(Img2GifWidget, self).__init__(parent)
+        self.setWindowTitle(Img2GifWidget.AppName)
+
         self.listWidget = QListWidget()
         self.listWidget.setMinimumSize(400, 300)
         self.btnAdd = QPushButton("&Add")
@@ -81,7 +84,7 @@ class Img2GifWidget(QDialog):
         self.txtGifPath.returnPressed.connect(self.updateGifPath)
 
     def itemAdd(self):
-        fileNames = QFileDialog.getOpenFileNames(None, u"{0} -- {1}".format(qApp.applicationName(), __appname__),
+        fileNames = QFileDialog.getOpenFileNames(None, u"{0} -- {1}".format(qApp.applicationName(), Img2GifWidget.AppName),
                                                  '.', u'所有文件(*.*);;BMP文件(*.bmp);;PNG文件(*.png);;JPG文件(*.jpg *.jpeg)')
         for fn in fileNames:
             f = QFileInfo(fn)
@@ -113,7 +116,7 @@ class Img2GifWidget(QDialog):
             self.listWidget.takeItem(row)
 
     def setGifPath(self):
-        filename = QFileDialog.getSaveFileName(self, u"{0} -- {1}".format(qApp.applicationName(), __appname__),
+        filename = QFileDialog.getSaveFileName(self, u"{0} -- {1}".format(qApp.applicationName(), Img2GifWidget.AppName),
                                                ".", "Gif(*.gif)")
         self.txtGifPath.setText(filename)
 
@@ -124,7 +127,7 @@ class Img2GifWidget(QDialog):
             self.txtGifPath.setText(fileName)
             return True
         else:
-            QMessageBox.warning(self, u"{0} -- warning".format(__appname__),
+            QMessageBox.warning(self, u"{0} -- warning".format(Img2GifWidget.AppName),
                                 u"要生成的GIF存储路径{0}不是有效的GIF文件".format(unicode(fileName)))
             return False
 
@@ -132,7 +135,7 @@ class Img2GifWidget(QDialog):
 
         imgs = [unicode(self.listWidget.item(i).text()) for i in range(self.listWidget.count())]
         if len(imgs) <= 1:
-            QMessageBox.warning(self, u"{0} - {1}".format(qApp.applicationName(), __appname__),
+            QMessageBox.warning(self, u"{0} - {1}".format(qApp.applicationName(), Img2GifWidget.AppName),
                                 u"GIF动画文件必须要给定大于一张图片。")
             return
         if not self.updateGifPath():
@@ -141,11 +144,11 @@ class Img2GifWidget(QDialog):
         loops = self.spbLoop.value()
         ok, msg = img2gif.images2gif(imgs, self.txtGifPath.text(), durations=durations, loops=loops)
         if ok:
-            QMessageBox.about(self, u"{0} - {1}".format(qApp.applicationName(), __appname__),
+            QMessageBox.about(self, u"{0} - {1}".format(qApp.applicationName(), Img2GifWidget.AppName),
                               u"Succeed!\n{0}".format(msg))
             qApp.processEvents()
         else:
-            QMessageBox.about(u"{0} - {1}".format(qApp.applicationName(), __appname__),
+            QMessageBox.about(u"{0} - {1}".format(qApp.applicationName(), Img2GifWidget.AppName),
                               u"sorry! Failed to generate the {0}".format(unicode(self.txtGifPath)))
 
 

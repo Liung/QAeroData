@@ -7,11 +7,14 @@ from PyQt4.QtGui import QApplication, QHBoxLayout, QTextBrowser, \
 import math
 from math import *
 
+
 class MiniCalculation(QDialog):
+    AppName = u"迷你计算器"
+
     def __init__(self, parent=None):
         super(MiniCalculation, self).__init__(parent)
         self.btnHelpState = False
-
+        self.setWindowTitle(MiniCalculation.AppName)
         self.txtBrower = QTextBrowser()
         self.txtLine = QLineEdit()
         self.txtLine.setPlaceholderText(u"请输入表达式，按回车结束...")

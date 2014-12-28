@@ -6,7 +6,7 @@ import sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-# from dataDynRigTrans import dataDynRigTransMain
+from dataDynRigTrans import dataDynRigTransMain
 from dataTrans import DataTransWidget
 from tools.wingView import WingViewWin
 from tools import miniCalculation, QPicConvertor, img2gifWidget, Tetris
@@ -530,9 +530,8 @@ class MainWindow(QMainWindow):
         ffb.show()
 
     def dynrigDataManu(self):
-        # dt = dataDynRigTransMain.dataTransWidget(self)
-        # dt.show()
-        pass
+        dt = dataDynRigTransMain.DataDynRigTransWidget(self)
+        dt.show()
 
     def toolsMiniCalculator(self):
         miniCal = miniCalculation.MiniCalculation(self)

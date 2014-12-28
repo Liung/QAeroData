@@ -149,17 +149,7 @@ class DataFilter(object):
                 headerLines.append(f1.readline())
 
         # write filt data to filter file
-        np.savetxt(filterFileName, filterData,
-                   fmt="%-10.8f", header='\n'.join(headerLines),
-                   comments='')
-
-        # with open(filterFileName, 'w') as f2:
-        #     f2.writelines(headerLines)
-        #     m, n = filterData.shape
-        #     for i in xrange(m):
-        #         for j in xrange(n):
-        #             f2.write("%-10.8f\t" % filterData[i, j])
-        #         f2.write("\n")
+        np.savetxt(filterFileName, filterData, fmt="%-10.8f", header='\n'.join(headerLines), comments='')
         return True
 
     def showWidget(self, parent):

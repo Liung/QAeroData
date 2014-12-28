@@ -250,12 +250,11 @@ class BalanceCoesTable(QDialog):
 class DataTransWidget(QDialog, Ui_dataTransWidget):
     AppName = u'气动数据转换'
     _BalanceSty__ = [u"14杆天平", u"16杆天平", u"18杆天平", u"盒式天平(内)", u"盒式天平(外)"]
-    _KineticsSty__ = [u"俯仰运动", u"滚转运动", u"偏航运动"]
 
     def __init__(self, parent=None):
         super(DataTransWidget, self).__init__(parent)
         self.setupUi(self)
-
+        # self.setWindowFlags(Qt.WindowMinimizeButtonHint)
         # 创建飞行器试验模型
         self.model = AircraftModel()
         self.initModel()
@@ -276,8 +275,6 @@ class DataTransWidget(QDialog, Ui_dataTransWidget):
         self.txtDeltaX.setValidator(QDoubleValidator())
         self.txtDeltaY.setValidator(QDoubleValidator())
         self.txtDeltaZ.setValidator(QDoubleValidator())
-        self.cbBalanceSty.addItems(DataTransWidget._BalanceSty__)
-        self.cbBalanceSty.setCurrentIndex(-1)
 
         self.txtModelArea.textChanged.connect(self.initModel)
         self.txtModelSpan.textChanged.connect(self.initModel)

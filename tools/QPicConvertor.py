@@ -1,14 +1,16 @@
 # *-.-* coding: UTF-8 *-.-*
-__author__ = 'LC'
-__appname__ = 'PicConvertor'
 
 import sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
+
 class PicConvertor(QDialog):
+    AppName = u"图像格式转换"
+
     def __init__(self, parent=None):
         super(PicConvertor, self).__init__(parent)
+        self.setWindowTitle(PicConvertor.AppName)
 
         self.txtRawFilename = QLineEdit()
         btnRawFilename = QPushButton(u"选择文件...")
@@ -72,7 +74,6 @@ class PicConvertor(QDialog):
         mainLay.addLayout(downLay)
 
         self.setLayout(mainLay)
-        self.setWindowTitle(__appname__)
 
         self.resultImageWidth = 16
         self.resultImageHeigth = 16
@@ -94,7 +95,7 @@ class PicConvertor(QDialog):
                 self.rawImage = QImage(filename)
                 if self.rawImage.isNull():
                     message = "Failed to read {0}".format(filename)
-                    QMessageBox.warning(self, __appname__,
+                    QMessageBox.warning(self, PicConvertor.AppName,
                                         message,QMessageBox.Ok)
                     return
                 width = self.rawImage.width()
@@ -106,19 +107,18 @@ class PicConvertor(QDialog):
                                                 Qt.KeepAspectRatio)
                 self.lblPicture.setPixmap(QPixmap.fromImage(newImage))
             else:
-                QMessageBox.warning(self,__appname__,
-                                    u"输入图像文件不存在！")
+                QMessageBox.warning(self, PicConvertor.AppName, u"输入图像文件不存在！")
                 return
 
     def saveFile(self):
-        filename = QFileDialog.getSaveFileName(self, u'{0} -- save file'.format(__appname__),
+        filename = QFileDialog.getSaveFileName(self, u'{0} -- save file'.format(PicConvertor.AppName),
                             self.txtResultFilename.text(),
                             " ".join(["*.{0}".format(pic)
                                       for pic in QImageWriter.supportedImageFormats()]))
         self.txtResultFilename.setText(filename)
 
     def setRawFilename(self):
-        filename = QFileDialog.getOpenFileName(self, u'{0} -- open file'.format(__appname__),
+        filename = QFileDialog.getOpenFileName(self, u'{0} -- open file'.format(PicConvertor.AppName),
                                                self.txtRawFilename.text(),
                                                " ".join(["*.{0}".format(pic)
                                                          for pic in QImageReader.supportedImageFormats()]))
@@ -145,11 +145,11 @@ class PicConvertor(QDialog):
             if QFileInfo(filename).completeSuffix() in QImageWriter.supportedImageFormats():
                 self.resultImage = self.rawImage.scaled(self.resultImageWidth, self.resultImageHeigth)
                 self.resultImage.save(filename)
-                QMessageBox.information(self, __appname__, u"文件转换成功！")
+                QMessageBox.information(self, PicConvertor.AppName, u"文件转换成功！")
             else:
-                QMessageBox.warning(self, __appname__, u"输出文件错误，请选择正确的输出文件格式！")
+                QMessageBox.warning(self, PicConvertor.AppName, u"输出文件错误，请选择正确的输出文件格式！")
         else:
-            QMessageBox.warning(self, __appname__, u"请先输入要转换的图片文件！")
+            QMessageBox.warning(self, PicConvertor.AppName, u"请先输入要转换的图片文件！")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

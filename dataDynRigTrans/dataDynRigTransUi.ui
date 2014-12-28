@@ -7,271 +7,252 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>557</width>
-    <height>603</height>
+    <width>648</width>
+    <height>782</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>天平数据转换</string>
+   <string/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <spacer name="horizontalSpacer_6">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_5">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-         <kerning>true</kerning>
-        </font>
-       </property>
-       <property name="text">
-        <string>实验数据转换</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_11">
-       <property name="text">
-        <string>天平类型</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="cbBalanceSty">
-       <property name="minimumSize">
-        <size>
-         <width>150</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>选择天平类型</string>
-       </property>
-       <property name="statusTip">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
+    <widget class="QWidget" name="userWidget" native="true">
+     <property name="minimumSize">
       <size>
-       <width>40</width>
-       <height>10</height>
+       <width>591</width>
+       <height>646</height>
       </size>
      </property>
-    </spacer>
+    </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QGroupBox" name="groupBox">
+      <widget class="QGroupBox" name="groupBox_4">
        <property name="title">
-        <string>模型参数</string>
+        <string>运动参数</string>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>展长（m）</string>
-            </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="1" alignment="Qt::AlignLeft">
+           <widget class="QComboBox" name="cbKineticsSty">
+            <item>
+             <property name="text">
+              <string>单独俯仰运动</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>单独滚转运动</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>单独偏航运动</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="label_22">
             <property name="text">
-             <string>参考面积（㎡）</string>
+             <string>运动类型</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="txtModelArea">
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_18">
             <property name="text">
-             <string>0.</string>
+             <string>采样频率</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="3">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>模型重心距天平位置：</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4">
-           <widget class="QLineEdit" name="txtDeltaY">
-            <property name="text">
-             <string>0.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLineEdit" name="txtDeltaX">
-            <property name="text">
-             <string>0.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4">
-           <widget class="QLineEdit" name="txtDeltaZ">
-            <property name="text">
-             <string>0.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3" alignment="Qt::AlignHCenter">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>ΔX（m）</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3" alignment="Qt::AlignHCenter">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>ΔY（m）</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3" alignment="Qt::AlignHCenter">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>ΔZ（m）</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="txtModelSpan">
-            <property name="text">
-             <string>0.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>实验风速（m/s）</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QLineEdit" name="txtWindSpeed">
-            <property name="text">
-             <string>0.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>平均气动弦长（m）</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="txtModelRefChord">
-            <property name="text">
-             <string>0.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>根弦长（m）</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="txtModelRootChord">
-            <property name="text">
-             <string>0.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" rowspan="5">
-           <widget class="Line" name="line">
+          <item row="0" column="2" rowspan="3">
+           <widget class="Line" name="line_4">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
            </widget>
           </item>
-          <item row="4" column="4" alignment="Qt::AlignHCenter">
-           <widget class="QPushButton" name="pbtnModelDataExport">
-            <property name="text">
-             <string>模型参数导出...</string>
+          <item row="1" column="6">
+           <widget class="QSpinBox" name="spbIgnorePts">
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+            <property name="value">
+             <number>200</number>
             </property>
            </widget>
           </item>
-          <item row="4" column="3" alignment="Qt::AlignHCenter">
-           <widget class="QPushButton" name="pbtnModelDataInput">
+          <item row="1" column="5">
+           <widget class="QLabel" name="label_21">
             <property name="text">
-             <string>载入模型参数</string>
+             <string>忽略点数</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <layout class="QGridLayout" name="gridLayout_5">
+            <item row="0" column="1" alignment="Qt::AlignLeft">
+             <widget class="QLabel" name="label_24">
+              <property name="text">
+               <string>Hz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QDoubleSpinBox" name="spbKineticsFre">
+              <property name="maximum">
+               <double>9999.989999999999782</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="1">
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="1" alignment="Qt::AlignLeft">
+             <widget class="QLabel" name="label_23">
+              <property name="text">
+               <string>Hz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QDoubleSpinBox" name="spbSampleRatio">
+              <property name="maximum">
+               <double>9999.989999999999782</double>
+              </property>
+              <property name="value">
+               <double>1000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>运动频率</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="lblPsi0">
+            <property name="text">
+             <string>偏航平衡角</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QDoubleSpinBox" name="spbPsi0">
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="6">
+           <widget class="QDoubleSpinBox" name="spbAmplitude">
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QDoubleSpinBox" name="spbPhi0">
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="lblPhi0_2">
+            <property name="text">
+             <string>俯仰平衡角</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QDoubleSpinBox" name="spbTheta0">
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLabel" name="lblPhi0">
+            <property name="text">
+             <string>滚转平衡角</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QLabel" name="lblAmplitude">
+            <property name="text">
+             <string>振幅</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="5">
+           <widget class="QLabel" name="labCorr">
+            <property name="text">
+             <string>精确度</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="6">
+           <widget class="QDoubleSpinBox" name="spbCorr">
+            <property name="minimum">
+             <double>0.500000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.990000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="5" colspan="2">
+           <widget class="QCheckBox" name="chbPeriodAverage">
+            <property name="text">
+             <string>是否周期平均</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <widget class="QLabel" name="lblPeriodNums">
+            <property name="text">
+             <string>使用周期数</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="4">
+           <widget class="QSpinBox" name="spbPeriodNums">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>9</number>
+            </property>
+            <property name="value">
+             <number>8</number>
             </property>
            </widget>
           </item>
@@ -281,277 +262,58 @@
       </widget>
      </item>
      <item>
-      <widget class="QGroupBox" name="groupBox_2">
+      <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>数据文件</string>
+        <string>滤波参数设置</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QCheckBox" name="chbButterFilter">
+          <property name="text">
+           <string>是否使用Butterworth滤波</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="1" colspan="3">
-           <widget class="QLabel" name="label_16">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
             <property name="text">
-             <string>请选择原始数据文件目录：</string>
+             <string>截止频率</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="2">
-           <widget class="QLineEdit" name="txtAeroFile"/>
-          </item>
-          <item row="6" column="3">
-           <widget class="QPushButton" name="pbtnAeroFile">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>...</string>
+             <string>滤波阶数</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="3">
-           <widget class="QPushButton" name="pbtnDynamicFile">
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLineEdit" name="txtStaticFile"/>
-          </item>
-          <item row="7" column="1" colspan="3">
-           <widget class="Line" name="line_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="txtDynamicFile"/>
-          </item>
-          <item row="5" column="1">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>体轴文件</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>风轴文件</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QPushButton" name="pbtnStaticFile">
-            <property name="text">
-             <string>...</string>
+             <string>Hz</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>静态文件</string>
+           <widget class="QSpinBox" name="spbFilterOrder">
+            <property name="minimum">
+             <number>3</number>
+            </property>
+            <property name="value">
+             <number>5</number>
             </property>
            </widget>
           </item>
-          <item row="5" column="2">
-           <widget class="QLineEdit" name="txtBodyFile"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>动态文件</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1" colspan="3">
-           <widget class="Line" name="line_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="3">
-           <widget class="QPushButton" name="pbtnBodyFile">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1" colspan="3">
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>选择生成数据文件目录：</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_4">
-          <property name="title">
-           <string>运动参数</string>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
-            <layout class="QGridLayout" name="gridLayout_3">
-             <item row="1" column="3">
-              <widget class="QLabel" name="label_21">
-               <property name="text">
-                <string>周期平均前忽略点数</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="4">
-              <widget class="QLineEdit" name="txtIgnorePoints">
-               <property name="text">
-                <string>200</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2" rowspan="3">
-              <widget class="Line" name="line_4">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_22">
-               <property name="text">
-                <string>运动类型</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1" alignment="Qt::AlignLeft">
-              <widget class="QComboBox" name="cbKineticsSty"/>
-             </item>
-             <item row="0" column="3">
-              <widget class="QLabel" name="label_20">
-               <property name="text">
-                <string>滚转平衡角</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="4">
-              <widget class="QLineEdit" name="txtPhi0">
-               <property name="text">
-                <string>0</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_19">
-               <property name="text">
-                <string>运动频率</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_18">
-               <property name="text">
-                <string>采样频率</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <layout class="QGridLayout" name="gridLayout_4">
-               <item row="0" column="0" alignment="Qt::AlignHCenter">
-                <widget class="QLineEdit" name="txtSampleRate">
-                 <property name="text">
-                  <string>1000</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1" alignment="Qt::AlignLeft">
-                <widget class="QLabel" name="label_23">
-                 <property name="text">
-                  <string>Hz</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="2" column="1">
-              <layout class="QGridLayout" name="gridLayout_5">
-               <item row="0" column="0" alignment="Qt::AlignHCenter">
-                <widget class="QLineEdit" name="txtKineticsFre">
-                 <property name="text">
-                  <string>0.2</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1" alignment="Qt::AlignLeft">
-                <widget class="QLabel" name="label_24">
-                 <property name="text">
-                  <string>Hz</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QGroupBox" name="groupBox_3">
-            <property name="minimumSize">
-             <size>
-              <width>118</width>
-              <height>50</height>
-             </size>
-            </property>
-            <property name="title">
-             <string>数据文件标题行数</string>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QSpinBox" name="spbFileHeaderNums">
-               <property name="maximum">
-                <number>10</number>
-               </property>
-               <property name="value">
-                <number>1</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbtnGenerateFile">
-            <property name="text">
-             <string>生成数据文件...</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbtnHelp">
-            <property name="text">
-             <string>帮助</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbtnExit">
-            <property name="text">
-             <string>退出</string>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spbCutoffFre">
+            <property name="value">
+             <double>4.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -565,50 +327,39 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>cbBalanceSty</tabstop>
-  <tabstop>txtModelArea</tabstop>
-  <tabstop>txtModelSpan</tabstop>
-  <tabstop>txtModelRootChord</tabstop>
-  <tabstop>txtModelRefChord</tabstop>
-  <tabstop>txtWindSpeed</tabstop>
-  <tabstop>txtDeltaX</tabstop>
-  <tabstop>txtDeltaY</tabstop>
-  <tabstop>txtDeltaZ</tabstop>
-  <tabstop>pbtnModelDataInput</tabstop>
-  <tabstop>pbtnModelDataExport</tabstop>
-  <tabstop>txtStaticFile</tabstop>
-  <tabstop>pbtnStaticFile</tabstop>
-  <tabstop>txtDynamicFile</tabstop>
-  <tabstop>pbtnDynamicFile</tabstop>
-  <tabstop>txtBodyFile</tabstop>
-  <tabstop>pbtnBodyFile</tabstop>
-  <tabstop>txtAeroFile</tabstop>
-  <tabstop>pbtnAeroFile</tabstop>
   <tabstop>cbKineticsSty</tabstop>
-  <tabstop>txtSampleRate</tabstop>
-  <tabstop>txtKineticsFre</tabstop>
-  <tabstop>txtPhi0</tabstop>
-  <tabstop>txtIgnorePoints</tabstop>
-  <tabstop>spbFileHeaderNums</tabstop>
-  <tabstop>pbtnGenerateFile</tabstop>
-  <tabstop>pbtnHelp</tabstop>
-  <tabstop>pbtnExit</tabstop>
  </tabstops>
  <resources/>
  <connections>
   <connection>
-   <sender>pbtnExit</sender>
-   <signal>clicked()</signal>
-   <receiver>dataTransWidget</receiver>
-   <slot>close()</slot>
+   <sender>chbButterFilter</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spbCutoffFre</receiver>
+   <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>535</x>
-     <y>557</y>
+     <x>402</x>
+     <y>693</y>
     </hint>
     <hint type="destinationlabel">
-     <x>556</x>
-     <y>470</y>
+     <x>468</x>
+     <y>721</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chbButterFilter</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spbFilterOrder</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>441</x>
+     <y>691</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>744</y>
     </hint>
    </hints>
   </connection>
