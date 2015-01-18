@@ -44,12 +44,27 @@ class DataDynRigTransWidget(QDialog, Ui_dataTransWidget):
         hr = self.dataTransWidget.spbFileHeaderNums.value()
         fr = self.dataTransWidget.spbFileFooterNums.value()
         try:
+            # 读取原始文件数据
             staRawData = np.genfromtxt(sf, skiprows=hr, skip_footer=fr)
             dynRAWData = np.genfromtxt(df, skiprows=hr, skip_footer=fr)
+            # 判断是否需要滤波处理并返回数据
             staFiltData = self._filt_array(staRawData) if self.chbButterFilter.isChecked() else staRawData
             dynFiltData = self._filt_array(dynRAWData) if self.chbButterFilter.isChecked() else dynRAWData
+            # 截断数据
             staTruncData = self._truncate_array(staFiltData)
             dynTruncData = self._truncate_array(dynFiltData)
+            # 根据运动类型返回正确角度信息：单独俯仰不做处理
+            if self.cbKineticsSty.currentIndex() == 1:
+                # roll oscillation
+                phiCol = self.dataTransWidget.spbPhiCol.value() - 1
+                staTruncData[:, phiCol] += self.spbPhi0.value()
+                dynTruncData[:, phiCol] += self.spbPhi0.value()
+            if self.cbKineticsSty.currentIndex() == 2:
+                # yaw oscillation
+                psiCol = self.dataTransWidget.spbPsiCol.value() - 1
+                staTruncData[:, psiCol] += self.spbPsi0.value()
+                dynTruncData[:, psiCol] += self.spbPsi0.value()
+            # 判断是否进行周期平均并返回数据
             staData = self._average_period_data(staTruncData)[0] if self.chbPeriodAverage.isChecked() else staTruncData
             dynData = self._average_period_data(dynTruncData)[0] if self.chbPeriodAverage.isChecked() else dynTruncData
 

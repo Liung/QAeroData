@@ -187,8 +187,8 @@ class Balance(object):
                     aeroTitle.insert(0, 'time')
                     Mb = np.concatenate((time[:, np.newaxis], Mb), axis=1)
                     Ma = np.concatenate((time[:, np.newaxis], Ma), axis=1)
-                np.savetxt(self._bodyFile, Mb, fmt='%-15.8f', header='\t'.join(bodyTitle).strip(), comments='')
-                np.savetxt(self._aeroFile, Ma, fmt='%-15.8f', header='\t'.join(aeroTitle).strip(), comments='')
+                np.savetxt(self._bodyFile, Mb, fmt='%+015.8f', header='\t'.join(bodyTitle).strip(), comments='')
+                np.savetxt(self._aeroFile, Ma, fmt='%+015.8f', header='\t'.join(aeroTitle).strip(), comments='')
             else:
                 Mb = np.concatenate((aeroAngle, Cb), axis=1)
                 Ma = np.concatenate((aeroAngle, Cb), axis=1)
@@ -200,8 +200,8 @@ class Balance(object):
                     aeroTitle.insert(0, 'time')
                     Mb = np.concatenate((time[:, np.newaxis], Mb), axis=1)
                     Ma = np.concatenate((time[:, np.newaxis], Ma), axis=1)
-                np.savetxt(self._bodyFile, Mb, fmt='%-15.8f', header='\t'.join(bodyTitle).strip(), comments='')
-                np.savetxt(self._aeroFile, Ma, fmt='%-15.8f', header='\t'.join(aeroTitle).strip(), comments='')
+                np.savetxt(self._bodyFile, Mb, fmt='%+015.8f', header='\t'.join(bodyTitle).strip(), comments='')
+                np.savetxt(self._aeroFile, Ma, fmt='%+015.8f', header='\t'.join(aeroTitle).strip(), comments='')
 
             return True, None
         except Exception, e:

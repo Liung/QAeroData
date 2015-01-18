@@ -57,19 +57,20 @@ class DataFilterWidget(QDialog, Ui_dataFilter):
         filterFile = self._filterFile
         filtOrder = self.spbFilterOrders.value()
 
-        if rawFile == unicode("") or filterFile == unicode(""):
+        if rawFile == unicode(""):
             QMessageBox.warning(self, u"{0} -- {1}".format(unicode(qApp.applicationName()),
                                                            __appname__),
-                                u"没有可用的滤波文件或滤波存储文件输入！")
+                                u"没有可用的滤波文件！")
             return
 
         try:
             dataFilterObj = DataFilter(samplingRate, filterOrder=filtOrder, cutoffFre=cutoffFre)
             headerNums = self.spbFileHeaderNums.value()
             dataFilterObj.setRawFile(rawFile)
-            dataFilterObj.setFiltFile(filterFile)
             dataFilterObj.setHeaderRows(headerNums)
-            dataFilterObj.toDataFile()
+            if filterFile != unicode(""):
+                dataFilterObj.setFiltFile(filterFile)
+                dataFilterObj.toDataFile()
 
             if self.chbFilterShow.isChecked():
                 mplTuple = dataFilterObj.showWidget(self)

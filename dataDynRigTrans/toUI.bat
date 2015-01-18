@@ -1,0 +1,1 @@
+python c:\Anaconda\Lib\site-packages\PyQt4\uic\pyuic.py -o dataDynRigTransUi.py dataDynRigTransUi.ui

@@ -1,1 +1,0 @@
-python c:\Anaconda\Lib\site-packages\PyQt4\uic\pyuic.py -o dataTransUi.py dataTransUi.ui
