@@ -10,7 +10,8 @@ __appname__ = u'实验数据转换'
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-import sys, os
+import sys
+import os
 import tempfile
 import numpy as np
 from scipy.signal import butter, filtfilt
@@ -115,6 +116,11 @@ class DataDynRigTransWidget(QDialog, Ui_dataTransWidget):
         return export_data
 
     def _filt_array(self, array):
+        """
+        data filter operation.
+        :param array: filter array
+        :return: array after filter
+        """
         order = self.spbFilterOrder.value()
         cutoff = self.spbCutoffFre.value()
         sampleRatio = self.spbSampleRatio.value()
@@ -135,8 +141,6 @@ class DataDynRigTransWidget(QDialog, Ui_dataTransWidget):
         """
         周期平均一组周期数据
         :param array:
-        :param peroid:
-        :param time:
         :return:
         """
         m, n = array.shape

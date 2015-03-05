@@ -404,6 +404,7 @@ class Balance(object):
         ba = self._model.refChord
         V = self._model.speed  # unit: m/s
         q = 0.5 * Balance.AIR_DENSITY * V ** 2  # unit: pa
+
         coe[:, :3] = f[:, :3] * 9.8 / (q * s)
         coe[:, 3:5] = f[:, 3:5] * 9.8 / (q * s * l)
         coe[:, 5] = f[:, 5] * 9.8 / (q * s * ba)
