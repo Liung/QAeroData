@@ -8,24 +8,24 @@ QAeroData为一款作者（Liung）在建模研究中使用Python语言和Qt框�
 图C. 1是QAeroData的主界面，主要包括三个组件：工作区、画图模块、文件导航模块。工作区支持多文档载入与操作；画图模块用来展示选定数据列的变化趋势；通过双击文件管理器中的能够识别的动态数据文件，可以快速的实现载入文件操作。
 QAeroData程序的文件菜单包括文件、编辑、View、天平数据、动态机构数据、工具、窗口和关于菜单，还含有两个可以浮动的工具条。
 
-[!QAeroData](./screenshots/QAeroData.png)
+[!QAeroData](https://github.com/Liung/QAeroData/blob/master/screenshots/QAeroData.png)
 
-[!QAeroData_about](./screenshots/QAeroData_about.png)
+[!QAeroData_about](https://github.com/Liung/QAeroData/blob/master/screenshots/QAeroData_about.png)
 
 在数字滤波器中，设计了Butterworth滤波器，用来将原始动态文件进行滤波处理。图C. 3中的左图是单文件滤波，主要用来调节滤波器的参数：滤波阶数与截止频率。当点击开始滤波之后，界面就会弹出各个通道的原始数据图和滤波之后的曲线分布（红色标示）。当该系列文件的参数确定之后，就可以使用批处理滤波工具进行滤波操作，方便快捷。
 
-[!QAeroData_singlefilter](./screenshots/QAeroData_singlefilter.png)
+[!QAeroData_singlefilter](https://github.com/Liung/QAeroData/blob/master/screenshots/QAeroData_singlefilter.png)
 
-[!QAeroData_batchfilter](./screenshots/QAeroData_batchfilter.png)
+[!QAeroData_batchfilter](https://github.com/Liung/QAeroData/blob/master/screenshots/QAeroData_batchfilter.png)
 
 图C. 4是天平数据转换工具。包括左图的单文件转换与右图的多文件转换。针对不同的天平类型，需要载入相应的天平系数文件。图C. 5是18杆天平的系数载入界面，允许天平系数的后期校准调节，并保存修改后的天平系数。
 
-[!QAeroData_singletranslate](./screenshots/QAeroData_singletranslate.png)
+[!QAeroData_singletranslate](https://github.com/Liung/QAeroData/blob/master/screenshots/QAeroData_singletranslate.png)
 
-[!QAeroData_batchtranslate](./screenshots/QAeroData_batchtranslate.png)
+[!QAeroData_batchtranslate](https://github.com/Liung/QAeroData/blob/master/screenshots/QAeroData_batchtranslate.png)
 
-[!QAeroData_balance_coe](./screenshots/QAeroData_balance_coe.png)
+[!QAeroData_balance_coe](https://github.com/Liung/QAeroData/blob/master/screenshots/QAeroData_balance_coe.png)
 
 通过在一般天平数据处理的基础上进一步开发了动态数据处理程序，包括滤波、周期平均等处理。如图C. 6所示。
 
-[!QAeroData_dynamic_data_translate](./screenshots/QAeroData_dynamic_data_translate.png)
+[!QAeroData_dynamic_data_translate](https://github.com/Liung/QAeroData/blob/master/screenshots/QAeroData_dynamic_data_translate.png)

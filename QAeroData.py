@@ -13,7 +13,6 @@ from tools import miniCalculation, QPicConvertor, img2gifWidget, Tetris
 from dataFilter import dataFilterMain, dataFilterBatchMain
 from widget import MatplotlibWidget, DirectoryViewer, SpreadSheet
 
-import qrc_resources
 
 __version__ = '1.0.0'
 __author__ = 'liuchao'
@@ -727,7 +726,7 @@ def main():
     splash.showMessage(u"Copy: 史志伟课题组所有 南京航空航天大学 流体力学系",
                        Qt.AlignRight | Qt.AlignBottom, Qt.black)
     time.sleep(0.5)
-    splash.showMessage(u"Developer: Liuchao Email: Lc.pypi@gmail.com",
+    splash.showMessage(u"Developer: Liung Email: Lc.pypi@gmail.com",
                        Qt.AlignRight | Qt.AlignBottom, Qt.black)
     time.sleep(0.5)
     form.show()
