@@ -14,18 +14,14 @@ QAeroData程序的文件菜单包括文件、编辑、View、天平数据、动�
 
 <div class="row">
 <a>
-<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_singlefilter.png" height="450" width="400">
+<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_singlefilter.png" height="400" width="350">
 </a>
 
 <a>
-<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_batchfilter.png" height="450" width="400">
+<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_batchfilter.png" height="400" width="350">
 </a>
 
 </div>
-
-![QAeroData_singlefilter](https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_singlefilter.png)
-
-![QAeroData_batchfilter](https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_batchfilter.png)
 
 图C. 4是天平数据转换工具。包括左图的单文件转换与右图的多文件转换。针对不同的天平类型，需要载入相应的天平系数文件。图C. 5是18杆天平的系数载入界面，允许天平系数的后期校准调节，并保存修改后的天平系数。
 
