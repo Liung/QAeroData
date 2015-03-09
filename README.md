@@ -14,11 +14,11 @@ QAeroData程序的文件菜单包括文件、编辑、View、天平数据、动�
 
 <div class="row">
 <a>
-<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_singlefilter.png" height="500" width="300">
+<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_singlefilter.png" height="450" width="400">
 </a>
 
 <a>
-<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_batchfilter.png" height="500" width="300">
+<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_batchfilter.png" height="450" width="400">
 </a>
 
 </div>
