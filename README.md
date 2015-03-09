@@ -10,9 +10,18 @@ QAeroData程序的文件菜单包括文件、编辑、View、天平数据、动�
 
 ![QAeroData](https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData.png)
 
-![QAeroData_about](https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_about.png)
-
 在数字滤波器中，设计了Butterworth滤波器，用来将原始动态文件进行滤波处理。图C. 3中的左图是单文件滤波，主要用来调节滤波器的参数：滤波阶数与截止频率。当点击开始滤波之后，界面就会弹出各个通道的原始数据图和滤波之后的曲线分布（红色标示）。当该系列文件的参数确定之后，就可以使用批处理滤波工具进行滤波操作，方便快捷。
+
+<div class="row">
+<a>
+<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_singlefilter.png" height="500" width="300">
+</a>
+
+<a>
+<img src="https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_batchfilter.png" height="500" width="300">
+</a>
+
+</div>
 
 ![QAeroData_singlefilter](https://github.com/Liung/QAeroData/raw/master/screenshots/QAeroData_singlefilter.png)
 
