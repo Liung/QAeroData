@@ -6,8 +6,10 @@ Author: liuchao
 Date: 2014-09-05
 """
 from __future__ import division
+
 import numpy as np
 from numpy import sin, cos
+
 from aircraft import AircraftModel
 
 
@@ -187,8 +189,8 @@ class Balance(object):
                     aeroTitle.insert(0, 'time')
                     Mb = np.concatenate((time[:, np.newaxis], Mb), axis=1)
                     Ma = np.concatenate((time[:, np.newaxis], Ma), axis=1)
-                np.savetxt(self._bodyFile, Mb, fmt='%+015.8f', header='\t'.join(bodyTitle).strip(), comments='')
-                np.savetxt(self._aeroFile, Ma, fmt='%+015.8f', header='\t'.join(aeroTitle).strip(), comments='')
+                np.savetxt(self._bodyFile, Mb, fmt='%+010.8f', header='\t'.join(bodyTitle).strip(), comments='')
+                np.savetxt(self._aeroFile, Ma, fmt='%+010.8f', header='\t'.join(aeroTitle).strip(), comments='')
             else:
                 Mb = np.concatenate((aeroAngle, Cb), axis=1)
                 Ma = np.concatenate((aeroAngle, Cb), axis=1)
@@ -200,8 +202,8 @@ class Balance(object):
                     aeroTitle.insert(0, 'time')
                     Mb = np.concatenate((time[:, np.newaxis], Mb), axis=1)
                     Ma = np.concatenate((time[:, np.newaxis], Ma), axis=1)
-                np.savetxt(self._bodyFile, Mb, fmt='%+015.8f', header='\t'.join(bodyTitle).strip(), comments='')
-                np.savetxt(self._aeroFile, Ma, fmt='%+015.8f', header='\t'.join(aeroTitle).strip(), comments='')
+                np.savetxt(self._bodyFile, Mb, fmt='%+010.8f', header='\t'.join(bodyTitle).strip(), comments='')
+                np.savetxt(self._aeroFile, Ma, fmt='%+010.8f', header='\t'.join(aeroTitle).strip(), comments='')
 
             return True, None
         except Exception, e:
@@ -358,7 +360,7 @@ class Balance(object):
         Fbb = np.dot(fe, coe[:, :6].T)
         Fbb[:, 5] = coe[5, 0]*fe[:, 0] + coe[5, 1]*fe[:, 1] + coe[5, 2]*fe[:, 1]**2 + coe[5, 3] * fe[:, 2] + coe[5, 4] * fe[:, 2] ** 2 + coe[5, 5]*fe[:, 3] + coe[5, 6]*fe[:, 4] + coe[5, 7]*fe[:, 5]
 
-        # the newbalance's "body frame" data translation to aircraft 's "body frame"
+        # the new balance's "body frame" data translation to aircraft 's "body frame"
         dx, dy, dz = self._model.dx, self._model.dy, self._model.dz
         Fb = np.zeros_like(Fbb)  # Fb: Force and moment of aircraft at the "Body frame"
         Fb[:, 0] = Fbb[:, 0]
@@ -371,7 +373,7 @@ class Balance(object):
         return Fb
     
     def _get_bodyCoe_from_balanceCoe(self, fbb):
-        #the newbalance's "body frame" data translation to aircraft 's "body frame"
+        #the new balance's "body frame" data translation to aircraft 's "body frame"
         fb = np.zeros_like(fbb)  # fb: Force and moment of aircraft at the "Body frame"
         dx = self._model.dx
         dy = self._model.dy
