@@ -7,10 +7,11 @@ from PyQt4.QtCore import Qt
 from guiqwt.plot import PlotManager, CurvePlot 
 from guiqwt.builder import make 
   
-PLOT_DEFINE = [[u"sin1f",u"cos1f"],[u"sin3f",u"cos3f"],[u"sin合成",u"cos合成"]] 
+PLOT_DEFINE = [[u"sin1f", u"cos1f"], [u"sin3f", u"cos3f"], [u"sin合成", u"cos合成"]]
 COLORS = ["blue", "red"] 
 DT = 0.001 
-  
+
+
 def get_peak_data(x, y, x0, x1, n, rate): 
     if len(x) == 0: 
         return [0], [0] 
@@ -35,13 +36,14 @@ def get_peak_data(x, y, x0, x1, n, rate):
     index += np.arange(0, len(y), step).reshape(-1, 1) 
     index = index.reshape(-1) 
     return x[index], y[index] 
-  
+
+
 class RealtimeDemo(QWidget): 
     def __init__(self): 
         super(RealtimeDemo, self).__init__() 
         self.setWindowTitle(u"Realtime Demo") 
   
-        self.data = {u"t":array("d")} 
+        self.data = {u"t": array("d")}
         for name in sum(PLOT_DEFINE, []): 
             self.data[name] = array("d") 
   
@@ -115,13 +117,14 @@ class RealtimeDemo(QWidget):
                 plot.replot() 
             else: 
                 plot.replot() 
-  
+
+
 def main(): 
     import sys 
     app = QApplication(sys.argv) 
     form = RealtimeDemo() 
     form.show() 
     sys.exit(app.exec_()) 
-  
+
 if __name__ == '__main__': 
     main()

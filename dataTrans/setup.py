@@ -16,7 +16,7 @@ opts = {
         "dll_excludes": ['MSVCP90.dll']
     }
 }
-data_files = ['G14.txt', 'G16.txt', 'G18.txt', 'Box.txt']
+data_files = ['G14.csv', 'G16.csv', 'G18.csv', 'Box.csv']
 setup(
     version="0.2.0",
     description="Balance data programming",
